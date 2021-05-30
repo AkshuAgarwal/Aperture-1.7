@@ -1,0 +1,12 @@
+{
+    "greentick": ":white_check_mark:",
+    "redcross": ":x:",
+    "cmd_syntax": ":pencil:",
+    "cmd_aliases": ":paperclips:",
+    "cmd_extended_help": ":books:",
+    "cmd_explained_usage": ":microscope:",
+    "cmd_permissions": ":lock:",
+    "cmd_bot_permissions": ":closed_lock_with_key:",
+    "cmd_cooldown": ":hourglass:",
+    "cmd_examples": ":mag:"
+}
