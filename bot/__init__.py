@@ -3,15 +3,16 @@ import json
 import traceback
 import asyncio
 import itertools
+from pytz import utc
 
 import asyncpg
 import discord
 from discord import Intents
-from discord.ext import commands
+from discord.ext import commands, ipc
 from discord.ext.commands import Bot as BotBase
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from pytz import utc
+from .main import is_disabled
 
 with open("./data/credentials.json", "r", encoding="utf-8") as f:
     credentials = json.load(f)
@@ -37,28 +38,66 @@ async def get_prefix(client, message):
     if isinstance(message.channel, discord.DMChannel):
         return list(map(''.join, itertools.product(*zip(str(default_prefix).upper(), str(default_prefix).lower()))))
     else:
-        async with client.pool.acquire() as conn:
-            data = await conn.fetchrow("SELECT prefix, prefix_case_insensitive FROM guild_data WHERE guild_id = $1", message.guild.id)
-            prefix = data["prefix"]
-            case_insensitive = data["prefix_case_insensitive"]
-            if case_insensitive is True:
+        try:
+            data = client.prefixes[message.guild.id]
+            prefix = data[0]
+            if data[1] is True:
                 return list(map(''.join, itertools.product(*zip(str(prefix).upper(), str(prefix).lower()))))
             else:
                 return prefix
+        except KeyError:
+            async with client.pool.acquire() as conn:
+                raw_data = await conn.fetch("SELECT * FROM guild_data;")
+                client.prefixes.clear()
+                for row in raw_data:
+                    client.prefixes[row['guild_id']] = [row['prefix'], row['prefix_case_insensitive']]
+                try:
+                    data = client.prefixes[message.guild.id]
+                    prefix = data[0]
+                    if data[1] is True:
+                        return list(map(''.join, itertools.product(*zip(str(prefix).upper(), str(prefix).lower()))))
+                    else:
+                        return prefix
+                except KeyError:
+                    async with conn.transaction() as trans:
+                        await conn.execute("INSERT INTO guild_data (guild_id, prefix, prefix_case_insensitive) VALUES ($1, $2, true);", message.guild.id, default_prefix)
+                        return list(map(''.join, itertools.product(*zip(str(default_prefix).upper(), str(default_prefix).lower()))))
 
-class Bot(BotBase):
+# async def get_prefix(client, message):
+#     default_prefix = botdata["prefix"]
+#     if isinstance(message.channel, discord.DMChannel):
+#         return list(map(''.join, itertools.product(*zip(str(default_prefix).upper(), str(default_prefix).lower()))))
+#     else:
+#         async with client.pool.acquire() as conn:
+#             data = await conn.fetchrow("SELECT prefix, prefix_case_insensitive FROM guild_data WHERE guild_id = $1;", message.guild.id)
+#             if not data:
+#                 return default_prefix
+#             else:
+#                 prefix = data["prefix"]
+#                 case_insensitive = data["prefix_case_insensitive"]
+#                 if case_insensitive is True:
+#                     return list(map(''.join, itertools.product(*zip(str(prefix).upper(), str(prefix).lower()))))
+#                 else:
+#                     return prefix
+
+class _IPCBot(BotBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.ipc = ipc.Server(self, secret_key=credentials["ipc_secret_key"])
+        self.load_extension("cogs.dashboard.dashboard_ipc")
+
+    async def on_ready(self):
+        print("Client [IPC Class] Ready!")
+
+    async def on_ipc_ready(self):
+        print("IPC Server Ready!")
+
+    async def on_ipc_error(self, endpoint, error):
+        print(f"IPCError -- Endpoint: {endpoint} - Error: {error}")
+
+class Bot(_IPCBot):
     def __init__(self):
-        self.ready = False
-        self.scheduler = AsyncIOScheduler()
-        self.scheduler.configure(timezone=utc)
-        self.loop = None
-
-        self.COGS = list()
-        for folders in os.scandir("./cogs"):
-            for files in os.listdir(f"./cogs/{folders.name}"):
-                if files.endswith(".py"):
-                    self.COGS.append((folders.name, files))
-
         super().__init__(
             command_prefix=get_prefix,
             intents=Intents.all(),
@@ -66,10 +105,25 @@ class Bot(BotBase):
             case_insensitive=True
         )
 
+        self.ready = False
+        self.scheduler = AsyncIOScheduler()
+        self.scheduler.configure(timezone=utc)
+        # self.loop = None
+
+        self.COGS = list()
+        for folders in os.scandir("./cogs"):
+            for files in os.listdir(f"./cogs/{folders.name}"):
+                if files.endswith(".py") and files != "dashboard_ipc.py":
+                    self.COGS.append((folders.name, files))
+
+        self.loop.create_task(self.cache_prefix())
+
     def setup(self) -> None:
         for (folder_name, file_name) in self.COGS:
             self.load_extension(f"cogs.{folder_name}.{file_name[:-3]}")
             print(f"+[COG] --> {folder_name}/{file_name}")
+
+        self.load_extension('jishaku')
         
         print(f"Loaded Cogs Successfully! Total Cogs: {len(self.COGS)}")
 
@@ -78,11 +132,21 @@ class Bot(BotBase):
             async with conn.transaction() as trans:
                 await conn.execute(open('./bot/main.sql').read())
 
+    async def cache_prefix(self):
+        await self.wait_until_ready()
+        self.prefixes = {}
+        async with self.pool.acquire() as conn:
+            raw_data = await conn.fetch("SELECT * FROM guild_data;")
+            for row in raw_data:
+                self.prefixes[row['guild_id']] = [row['prefix'], row['prefix_case_insensitive']]
+            print("Cached Guild Prefixes!")
+
     def run(self, version) -> None:
         self.version = version
 
         print('Setting up...')
         self.setup()
+        self.ipc.start()
 
         TOKEN = credentials['token']
         print('Running the Client...')
@@ -131,6 +195,10 @@ class Bot(BotBase):
 
         if ctx.command is None:
             return
+        else:
+            check = await is_disabled(self, ctx)
+            if check is False:
+                return
 
         await self.invoke(ctx)
 
