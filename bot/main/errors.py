@@ -54,11 +54,13 @@ class Errors:
         if isinstance(error, commands.NotOwner):
             return f"{e.redcross} **This is a Developer-Only Command!**"
         if isinstance(error, commands.MissingPermissions):
-            missing_perms = ", ".join(f"`{i}`" for i in self.ctx.command.permissions)
-            return f"**{e.redcross} You are missing Permissions to use this Command!**\n> Missing Permission(s): `{error.missing_perms}`\n> Required Permission(s): {missing_perms}"
+            missing_perms = ", ".join(f"`{i}`" for i in error.missing_perms)
+            required_perms = ", ".join(f"`{i}`" for i in self.ctx.command.permissions)
+            return f"**{e.redcross} You are missing Permissions to use this Command!**\n> Missing Permission(s): `{missing_perms}`\n> Required Permission(s): {required_perms}"
         if isinstance(error, commands.BotMissingPermissions):
-            bot_missing_perms = ", ".join(f"`{i}`" for i in self.ctx.command.bot_permissions)
-            return f"**{e.redcross} I am missing some Permissions to use this Command!**\n> Missing Permission(s): `{error.missing_perms}`\n> Required Permission(s): {bot_missing_perms}"
+            bot_missing_perms = ", ".join(f"`{i}`" for i in error.missing_perms)
+            bot_required_perms = ", ".join(f"`{i}`" for i in self.ctx.command.bot_permissions)
+            return f"**{e.redcross} I am missing some Permissions to use this Command!**\n> Missing Permission(s): `{bot_missing_perms}`\n> Required Permission(s): {bot_required_perms}"
         if isinstance(error, commands.MissingRole):
             return f"**{e.redcross} You are Missing Role to use this Command!**\n> Missing Role: `{error.missing_role}`"
         if isinstance(error, commands.BotMissingRole):

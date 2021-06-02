@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS guild_data (
 
 CREATE TABLE IF NOT EXISTS guild_disabled (
     guild_id BIGINT NOT NULL,
-    command_name VARCHAR(20),
+    command_name VARCHAR(30),
     channel_id BIGINT
 );

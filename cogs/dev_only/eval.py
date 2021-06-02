@@ -6,10 +6,8 @@ import datetime
 
 import discord
 from discord.ext import commands
-from bot.main import NewCommand
 
-from bot.main import Paginator
-from bot.main import Errors
+from bot.main import NewCommand, Paginator, Errors
 
 class Eval(commands.Cog):
     def __init__(self, client):
@@ -21,7 +19,7 @@ class Eval(commands.Cog):
 
         return code
 
-    def make_embeds(self, ctx, result):
+    def make_embeds(self, ctx, result) -> list:
         embeds = []
         entries = [result[i:i+2000] for i in range(0, len(result), 2000)]
         for entry in entries:
@@ -46,7 +44,7 @@ class Eval(commands.Cog):
         help="""This command can execute a Python Script into the Bot to get Bot Data and do several Operations for Bot and Data Management.
 This is a **Developer Only** Command. Means, only the Bot owner can use this Command.""",
         usage="`eval` `<code:str>`",
-        explained_usage=["**Code:** The Python Code to execute. Code blocks are also Acceptable."],
+        explained_usage=["**Code:** The Python Code to execute. Code blocks are also Accepted."],
         permissions=['Developer Only'],
         bot_permissions=['Manage Messages'],
         examples=[
@@ -59,14 +57,14 @@ This is a **Developer Only** Command. Means, only the Bot owner can use this Com
         code = self.clean_code(code)
 
         local_variables = {
-            'discord': discord,
-            'commands': commands,
-            'client': self.client,
-            'ctx': ctx,
-            'channel': ctx.channel,
-            'author': ctx.author,
-            'guild': ctx.guild,
-            'message': ctx.message
+            '_discord': discord,
+            '_commands': commands,
+            '_client': self.client,
+            '_ctx': ctx,
+            '_channel': ctx.channel,
+            '_author': ctx.author,
+            '_guild': ctx.guild,
+            '_message': ctx.message
         }
 
         stdout = io.StringIO()
