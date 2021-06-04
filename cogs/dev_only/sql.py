@@ -6,8 +6,9 @@ import datetime
 
 import discord
 from discord.ext import commands
+from tabulate import tabulate
 
-from bot.main import NewCommand, Paginator, Errors, Emoji
+from bot.main import NewCommand, StringPaginator, Errors, Emoji
 
 class SQL(commands.Cog):
     def __init__(self, client):
@@ -19,21 +20,12 @@ class SQL(commands.Cog):
         
         return query
 
-    def make_embeds(self, ctx, result) -> list:
-        embeds = []
-        entries = [result[i:i+2000] for i in range(0, len(result), 2000)]
-        for entry in entries:
-            embed = discord.Embed(
-                title='Output for SQL Query',
-                description=f"```py\n{entry}```",
-                color=0x2c2f33,
-                timestamp=datetime.datetime.utcnow()
-            )
-            embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
-            embed.set_footer(text=f"Page No. {entries.index(entry)+1}/{len(entries)}", icon_url=ctx.guild.me.avatar_url)
-            embeds.append(embed)
-        
-        return embeds
+    def chunk_result(self, ctx, result):
+        entries = []
+        _temp_entries = [f"```\n{result[i:i+1950]}\n```" for i in range(0, len(result), 1950)]
+        for index, entry in enumerate(_temp_entries, start=1):
+            entries.append(f"{entry} Page No: `{index}/{len(_temp_entries)}`")
+        return entries
 
     @commands.command(
         name='sql',
@@ -56,50 +48,39 @@ This is a **Developer Only** Command. Means, only the Bot owner can use this Com
     async def _sql(self, ctx, query_type:str, *, query:str):
         query = self.clean_query(query)
 
-        local_variables = {
-            "_client": self.client
-        }
-
-        stdout = io.StringIO()
-
-        if query_type == "fetch":
-            code = f'''
-async with _client.pool.acquire() as conn:
-    async with conn.transaction() as trans:
-        data = await conn.fetch('{query}')
-        print(data)'''
-        elif query_type == "execute":
-            code = f'''
-async with _client.pool.acquire() as conn:
-    async with conn.transaction() as trans:
-        await conn.execute('{query}')'''
-        else:
-            return await ctx.reply(f"{Emoji.redcross} Invalid Query Type! Valid Types: `fetch`/`execute`")
-
-        try:
-            with contextlib.redirect_stdout(stdout):
-                exec(
-                    f"async def func():\n{textwrap.indent(code, '    ')}", local_variables
-                )
-
-                obj = await local_variables['func']()
-                result = f"{stdout.getvalue()}\n-- {obj}\n"
-
-        except Exception as e:
-            result = "".join(format_exception(e, e, e.__traceback__))
-
-        pager = Paginator(
-            pages = self.make_embeds(ctx, result),
-            timeout=150
-        )
-        await pager.start(ctx)
+        async with self.client.pool.acquire() as conn:
+            async with conn.transaction() as trans:
+                if query_type == "fetch":
+                    temp_list = []
+                    try:
+                        data = await conn.fetch(query)
+                        if not data:
+                            return await ctx.reply(f"Output: []")
+                        for row in data:
+                            temp_list.append(list(row.values()))
+                        table = tabulate(temp_list, headers=list(data[0].keys()), showindex="always", tablefmt="psql")
+                        chunk_list = self.chunk_result(ctx, table)
+                        pager = StringPaginator(
+                            pages=chunk_list, timeout=180
+                        )
+                        await pager.start(ctx)
+                    except Exception as e:
+                        # return await ctx.reply(f"{Emoji.redcross} **Oops! Some Error Occured...**\n> Error: `{e}`")
+                        raise e
+                elif query_type == "execute":
+                    try:
+                        resp = await conn.execute(query)
+                        return await ctx.reply(f"> Output: `{resp}`")
+                    except Exception as e:
+                        return await ctx.reply(f"{Emoji.redcross} **Oops! Some Error Occured...**\n> Error: `{e}`")
+                else:
+                    return await ctx.reply(f"{Emoji.redcross} Invalid Query Type! Valid Types: `fetch`/`execute`")
 
     @_sql.error
     async def _sql_error(self, ctx, error):
         _error = getattr(error, 'original', error)
         error = Errors(ctx, _error)
-        resp = error.response()
-        await ctx.reply(resp)
+        await error.response()
 
 def setup(client):
     client.add_cog(SQL(client))

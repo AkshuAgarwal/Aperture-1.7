@@ -15,13 +15,19 @@ class Help(commands.Cog):
         self.client = client
         self.client.remove_command("help")
 
-    async def build_help(self, ctx: commands.Context, prefix:str):
+    async def build_help(self, ctx: commands.Context):
         data = {
             "General Commands": [
-                "ping"
+                "ping", "help"
+            ],
+            "Fun Commands": [
+                "morse", "ascii"
+            ],
+            "Admin Commands": [
+                "setprefix", "enablecommand", "disablecommand", "enablechannel", "disablechannel"
             ],
             "Developer Commands": [
-                "eval", "load", "unload", "reload"
+                "eval", "sql", "load", "unload", "reload"
             ],
         }
         all_commands = self.client.commands
@@ -33,7 +39,7 @@ class Help(commands.Cog):
                 _command = discord.utils.find(lambda cmd: cmd.name == commands, all_commands)
                 _command_data.append((_command.name, _command.brief))
 
-            _description=f"• {prefix}"+ f"\n• {prefix}".join(f"{cmd_name} → {cmd_brief}" for (cmd_name, cmd_brief) in _command_data)
+            _description=f"• {ctx.prefix}"+ f"\n• {ctx.prefix}".join(f"{cmd_name} → {cmd_brief}" for (cmd_name, cmd_brief) in _command_data)
             _command_data.clear()
 
             embed = discord.Embed(
@@ -53,7 +59,7 @@ class Help(commands.Cog):
         await pager.start(ctx)
 
 
-    async def get_command_help(self, ctx: commands.Context, command_name:str, prefix:str):
+    async def get_command_help(self, ctx: commands.Context, command_name:str):
         command = discord.utils.find(lambda cmd: cmd.name == command_name or command_name in cmd.aliases, self.client.commands)
         if command is not None:
             embed = discord.Embed(
@@ -68,7 +74,7 @@ class Help(commands.Cog):
             if not command.usage:
                 _cmd_syntax = "None"
             else:
-                _cmd_syntax = f"`{prefix}` {command.usage}"
+                _cmd_syntax = f"`{ctx.prefix}` {command.usage}"
             if not command.aliases:
                 _cmd_aliases = "None"
             else:
@@ -88,7 +94,7 @@ class Help(commands.Cog):
             if not command.examples:
                 _cmd_examples = "None"
             else:
-                _cmd_examples = f"→ {prefix}" + f"\n→ {prefix}".join([i for i in command.examples])
+                _cmd_examples = f"→ {ctx.prefix}" + f"\n→ {ctx.prefix}".join([i for i in command.examples])
 
             embed.add_field(name=f"{Emoji.cmd_syntax} | Command Syntax",
                 value=_cmd_syntax, inline=False)
@@ -126,16 +132,12 @@ class Help(commands.Cog):
         ]
     )
     async def _help(self, ctx, command_name: Optional[str] = None):
-        async with self.client.pool.acquire() as conn:
-            data = await conn.fetchrow("SELECT prefix from guild_data WHERE guild_id=$1;", ctx.guild.id)
-            prefix = data["prefix"]
-
         if not command_name:
-            await self.build_help(ctx, prefix)
+            await self.build_help(ctx)
         elif command_name == '--all':
             pass # Send all commands in DM
         else:
-            await self.get_command_help(ctx, command_name, prefix)
+            await self.get_command_help(ctx, command_name)
 
 def setup(client):
     client.add_cog(Help(client))

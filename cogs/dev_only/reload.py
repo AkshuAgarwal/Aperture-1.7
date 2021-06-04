@@ -45,8 +45,7 @@ The Cog should be in the Proper directory as set by the Developer.""",
     async def _reload_error(self, ctx, error):
         _error = getattr(error, "original", error)
         error = Errors(ctx, _error)
-        resp = error.response()
-        await ctx.reply(resp)
+        await error.response()
 
 def setup(client):
     client.add_cog(Reload(client))

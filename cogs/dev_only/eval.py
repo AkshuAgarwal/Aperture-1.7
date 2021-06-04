@@ -91,8 +91,7 @@ This is a **Developer Only** Command. Means, only the Bot owner can use this Com
     async def _eval_error(self, ctx, error):
         _error = getattr(error, 'original', error)
         error = Errors(ctx, _error)
-        resp = error.response()
-        await ctx.reply(resp)
+        await error.response()
 
 def setup(client):
     client.add_cog(Eval(client))

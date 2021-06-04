@@ -20,7 +20,7 @@ You can also choose whether you want the Prefix to be Case Insensitive, i.e., if
         usage="`setprefix` `<prefix:str>` `[case_insensitive:bool(true/t/false/f), default:true]`",
         explained_usage=["**Prefix:** Prefix for the Bot to be set.", "**Case Insensitive:** Whether to Accept prefix regardless of it's Case (True/False) [Optional, default:True]"],
         permissions=["Administrator"],
-        cooldown="`1`/`60 sec` - [`Guild`]",
+        cooldown="`1/60 sec` - [`Guild`]",
         examples=[
             'setprefix ap!',
             'setprefix ! false',
@@ -51,8 +51,7 @@ You can also choose whether you want the Prefix to be Case Insensitive, i.e., if
     async def _setprefix_error(self, ctx, error):
         _error = getattr(error, "original", error)
         error = Errors(ctx, error)
-        resp = error.response()
-        await ctx.reply(resp)
+        await error.response()
 
 def setup(client):
     client.add_cog(SetPrefix(client))
