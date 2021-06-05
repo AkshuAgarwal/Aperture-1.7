@@ -48,16 +48,25 @@ class Morse(commands.Cog):
         if check is True:
             _templist = str(string).split(' ')
             converted = "".join(MORSE_TO_TEXT[str(i)] for i in _templist)
-            await ctx.reply(f"`{converted}`")
+            try:
+                response = self.client.old_responses[ctx.message.id]
+                await response.edit(content=f"`{converted}`", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
+            except KeyError:
+                response = await ctx.reply(f"`{converted}`")
+                self.client.old_responses[ctx.message.id] = response
         else:
-            #texttomorse
             _templist = []
             for char in str(string):
                 _templist.append(char)
             try:
                 converted = " ".join(TEXT_TO_MORSE[str(i).upper()] for i in _templist)
                 if len(converted) <= 1998:
-                    await ctx.reply(f"`{converted}`")
+                    try:
+                        response = self.client.old_responses[ctx.message.id]
+                        await response.edit(content=f"`{converted}`", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
+                    except KeyError:
+                        response = await ctx.reply(f"`{converted}`")
+                        self.client.old_responses[ctx.message.id] = response
                 else:
                     entries = [f"`{converted[i:i+1998]}`" for i in range(0, len(converted), 1998)]
                     pager = StringPaginator(
@@ -66,7 +75,13 @@ class Morse(commands.Cog):
                     )
                     await pager.start(ctx)
             except KeyError as e:
-                return await ctx.reply(f"{Emoji.redcross} The String contains some characters which cannot be converted into Morse!")
+                try:
+                    response = self.client.old_responses[ctx.message.id]
+                    return await response.edit(content=f"{Emoji.redcross} The String contains some characters which cannot be converted into Morse!", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
+                except KeyError:
+                    response = await ctx.reply(f"{Emoji.redcross} The String contains some characters which cannot be converted into Morse!")
+                    self.client.old_responses[ctx.message.id] = response
+                    return
 
     @_morse.error
     async def _morse_error(self, ctx, error):

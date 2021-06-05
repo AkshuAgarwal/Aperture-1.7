@@ -4,11 +4,12 @@ import traceback
 import asyncio
 import itertools
 from pytz import utc
+from contextlib import suppress
 
 import asyncpg
 import discord
 from discord import Intents
-from discord.ext import commands, ipc
+from discord.ext import commands, tasks, ipc
 from discord.ext.commands import Bot as BotBase
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -63,23 +64,6 @@ async def get_prefix(client, message):
                         await conn.execute("INSERT INTO guild_data (guild_id, prefix, prefix_case_insensitive) VALUES ($1, $2, true);", message.guild.id, default_prefix)
                         return list(map(''.join, itertools.product(*zip(str(default_prefix).upper(), str(default_prefix).lower()))))
 
-# async def get_prefix(client, message):
-#     default_prefix = botdata["prefix"]
-#     if isinstance(message.channel, discord.DMChannel):
-#         return list(map(''.join, itertools.product(*zip(str(default_prefix).upper(), str(default_prefix).lower()))))
-#     else:
-#         async with client.pool.acquire() as conn:
-#             data = await conn.fetchrow("SELECT prefix, prefix_case_insensitive FROM guild_data WHERE guild_id = $1;", message.guild.id)
-#             if not data:
-#                 return default_prefix
-#             else:
-#                 prefix = data["prefix"]
-#                 case_insensitive = data["prefix_case_insensitive"]
-#                 if case_insensitive is True:
-#                     return list(map(''.join, itertools.product(*zip(str(prefix).upper(), str(prefix).lower()))))
-#                 else:
-#                     return prefix
-
 class _IPCBot(BotBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -96,6 +80,7 @@ class _IPCBot(BotBase):
     async def on_ipc_error(self, endpoint, error):
         print(f"IPCError -- Endpoint: {endpoint} - Error: {error}")
 
+
 class Bot(_IPCBot):
     def __init__(self):
         super().__init__(
@@ -108,7 +93,11 @@ class Bot(_IPCBot):
         self.ready = False
         self.scheduler = AsyncIOScheduler()
         self.scheduler.configure(timezone=utc)
-        # self.loop = None
+
+        self.old_responses = {}
+        self.prefixes = {}
+        self.disabled_data = {}
+        self.time_limit = 120
 
         self.COGS = list()
         for folders in os.scandir("./cogs"):
@@ -116,7 +105,8 @@ class Bot(_IPCBot):
                 if files.endswith(".py") and files != "dashboard_ipc.py":
                     self.COGS.append((folders.name, files))
 
-        self.loop.create_task(self.cache_prefix())
+        self.loop.create_task(self.startup())
+
 
     def setup(self) -> None:
         for (folder_name, file_name) in self.COGS:
@@ -127,19 +117,45 @@ class Bot(_IPCBot):
         
         print(f"Loaded Cogs Successfully! Total Cogs: {len(self.COGS)}")
 
+
     async def setup_db(self):
         async with self.pool.acquire() as conn:
             async with conn.transaction() as trans:
                 await conn.execute(open('./bot/main.sql').read())
+                print('Database Setup Done!')
 
-    async def cache_prefix(self):
-        await self.wait_until_ready()
-        self.prefixes = {}
+    async def cache_db(self):
         async with self.pool.acquire() as conn:
             raw_data = await conn.fetch("SELECT * FROM guild_data;")
             for row in raw_data:
                 self.prefixes[row['guild_id']] = [row['prefix'], row['prefix_case_insensitive']]
             print("Cached Guild Prefixes!")
+            raw_data_2 = await conn.fetch("SELECT * FROM guild_disabled;")
+            for row in raw_data_2:
+                self.disabled_data[row['guild_id']] = {
+                    'command_name': row['command_name'],
+                    'channel_id': row['channel_id']
+                }
+            print("Cached Guild Disabled Data!")
+
+    @tasks.loop(seconds=540)
+    async def update_presence(self):
+        x = 0
+        for guild in self.guilds:
+            x += len(guild.members)
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="ap!help"))
+        await asyncio.sleep(180)
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{x} Members in {len(self.guilds)} Servers!"))
+        await asyncio.sleep(180)
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="Dashboard Coming Soon..."))
+        await asyncio.sleep(180)
+
+    async def startup(self):
+        await self.wait_until_ready()
+        await self.setup_db()
+        await self.cache_db()
+        self.update_presence.start()
+
 
     def run(self, version) -> None:
         self.version = version
@@ -172,10 +188,6 @@ class Bot(_IPCBot):
     async def on_ready(self) -> None:
         if self.ready:
             return
-            
-        print('Setting up Database...')
-        await self.setup_db()
-        print('Database Setup Done!')
 
         self.scheduler.start()
         print(f"Scheduler Started [{len(self.scheduler.get_jobs()):,} job(s) Scheduled]")
@@ -186,23 +198,45 @@ class Bot(_IPCBot):
     async def on_message(self, message: discord.Message) -> None:
         if message.author.bot:
             return
-
         await self.process_commands(message)
 
+    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        if before.author.bot:
+            return
+        if before.content == after.content:
+            return
+        time_diff = after.edited_at - before.created_at
+        if time_diff.seconds > self.time_limit:
+            return
+        await self.process_commands(after)
+
+    async def on_message_delete(self, message):
+        if message.author.bot:
+            pass
+        try:
+            bot_response = self.old_responses[message.id]
+            await bot_response.delete()
+        except KeyError:
+            pass
 
     async def process_commands(self, message: discord.Message) -> None:
         ctx = await self.get_context(message, cls=commands.Context)
-
         if ctx.command is None:
             return
-        else:
-            check = await is_disabled(self, ctx)
-            if check is False:
-                return
-
+        check = await is_disabled(self, ctx)
+        if check is False:
+            return
         await self.invoke(ctx)
 
 client = Bot()
+
+
+@client.event
+async def on_command_completion(ctx):
+    with suppress(Exception):
+        await asyncio.sleep(client.time_limit)
+        client.old_responses.pop(ctx.message.id)
+
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(create_pool(client, loop))

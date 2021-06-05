@@ -2,6 +2,7 @@
 
 from typing import Optional
 import datetime
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -112,10 +113,22 @@ class Help(commands.Cog):
                 value=command.cooldown if command.cooldown is not None else "None", inline=False)
             embed.add_field(name=f"{Emoji.cmd_examples} | Examples",
                 value=_cmd_examples, inline=False)
-            return await ctx.reply(embed=embed)
 
+            try:
+                response = self.client.old_responses[ctx.message.id]
+                return await response.edit(content=None, embed=embed, file=None, files=None, delete_after=None, allowed_mentions=None)
+            except KeyError:
+                response = await ctx.reply(embed=embed)
+                self.client.old_responses[ctx.message.id] = response
+                return
         else:
-            return await ctx.reply(f"{Emoji.redcross} No Command named `{command_name}` Found!")
+            try:
+                response = self.client.old_responses[ctx.message.id]
+                return await response.edit(content=f"{Emoji.redcross} No Command named `{command_name}` Found!", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
+            except KeyError:
+                response = await ctx.reply(f"{Emoji.redcross} No Command named `{command_name}` Found!")
+                self.client.old_responses[ctx.message.id] = response
+                return
 
 
     @commands.command(
@@ -135,7 +148,7 @@ class Help(commands.Cog):
         if not command_name:
             await self.build_help(ctx)
         elif command_name == '--all':
-            pass # Send all commands in DM
+            return await ctx.reply("Command Making is in Progress...")
         else:
             await self.get_command_help(ctx, command_name)
 

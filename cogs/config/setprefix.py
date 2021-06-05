@@ -39,13 +39,25 @@ You can also choose whether you want the Prefix to be Case Insensitive, i.e., if
         elif case_insensitive.lower() in ["false", "f"]:
             case = False
         else:
-            return await ctx.reply(f"{Emoji.redcross} `{case_insensitive}` is not a Valid Boolean Type Accepted by the Bot...\nChoose from True/t or False/f")
+            try:
+                response = self.client.old_responses[ctx.message.id]
+                return await response.edit(content=f"{Emoji.redcross} `{case_insensitive}` is not a Valid Boolean Type Accepted by the Bot...\nChoose from `True/t` or `False/f`", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
+            except KeyError:
+                response = await ctx.reply(f"{Emoji.redcross} `{case_insensitive}` is not a Valid Boolean Type Accepted by the Bot...\nChoose from `True/t` or `False/f`")
+                self.client.old_responses[ctx.message.id] = response
+                return
 
         async with self.client.pool.acquire() as conn:
             async with conn.transaction() as trans:
                 await conn.execute("UPDATE guild_data SET prefix=$1, prefix_case_insensitive=$2 WHERE guild_id=$3;", prefix, case, ctx.guild.id)
                 self.client.prefixes[ctx.guild.id] = [prefix, case]
-                return await ctx.reply(f"{Emoji.greentick} Successfully Changed prefix for this Server to `{prefix}`!")
+                try:
+                    response = self.client.old_responses[ctx.message.id]
+                    return await response.edit(content=f"{Emoji.greentick} Successfully Changed prefix for this Server to `{prefix}`!", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
+                except KeyError:
+                    response = await ctx.reply(f"{Emoji.greentick} Successfully Changed prefix for this Server to `{prefix}`!")
+                    self.client.old_responses[ctx.message.id] = response
+                    return
 
     @_setprefix.error
     async def _setprefix_error(self, ctx, error):

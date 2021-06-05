@@ -35,11 +35,23 @@ The Cog should be in the Proper directory as set by the Developer.""",
                 if files.endswith('.py') and files[:-3] == cog_name:
                     self.client.load_extension(f"cogs.{folders.name}.{files[:-3]}")
                     _found = True
-                    return await ctx.reply(f"{Emoji.greentick} Successfully Loaded `{cog_name}.py`")
-        
-        if _found is False:
-            return await ctx.reply(f"{Emoji.redcross} No file named `{cog_name}` Found")
+                    try:
+                        response = self.client.old_responses[ctx.message.id]
+                        return await response.edit(content=f"{Emoji.greentick} Successfully Loaded `{cog_name}.py`", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
+                    except KeyError:
+                        response = await ctx.reply(f"{Emoji.greentick} Successfully Loaded `{cog_name}.py`")
+                        self.client.old_responses[ctx.message.id] = response
+                        return
 
+        if _found is False:
+            try:
+                response = self.client.old_responses[ctx.message.id]
+                return await response.edit(content=f"{Emoji.redcross} No file named `{cog_name}` Found", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
+            except KeyError:
+                response = await ctx.reply(f"{Emoji.redcross} No file named `{cog_name}` Found")
+                self.client.old_responses[ctx.message.id] = response
+                return
+                
     @_load.error
     async def _load_error(self, ctx, error):
         _error = getattr(error, "original", error)

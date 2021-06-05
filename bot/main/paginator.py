@@ -115,7 +115,13 @@ class StringPaginator:
 
     async def paginator(self):
         with suppress(discord.HTTPException, discord.Forbidden, IndexError):
-            self.message = await self.ctx.reply(self.pages[0])
+            try:
+                response = self.bot.old_responses[self.ctx.message.id]
+                await response.edit(content=self.pages[0], embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
+                self.message = response
+            except KeyError:
+                self.message = response = await self.ctx.reply(self.pages[0])
+                self.bot.old_responses[self.ctx.message.id] = response
 
         if len(self.pages) > 1:
             self.__tasks.append(self.loop.create_task(self.add_reactions()))
@@ -189,7 +195,13 @@ class StringPaginator:
         if len(self.pages) == 0:
             raise RuntimeError("Can't paginate an empty list.")
         elif len(self.pages) == 1:
-            return await ctx.reply(self.pages[0])
+            try:
+                response = self.bot.old_responses[self.ctx.message.id]
+                return await response.edit(content=self.pages[0], embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
+            except KeyError:
+                response = await self.ctx.reply(self.pages[0])
+                self.bot.old_responses[self.ctx.message.id] = response
+                return
 
         self.end = float(len(self.pages) - 1)
         if self.compact is False:
@@ -342,7 +354,13 @@ class Paginator:
 
     async def paginator(self):
         with suppress(discord.HTTPException, discord.Forbidden, IndexError):
-            self.message = await self.ctx.reply(embed=self.pages[0])
+            try:
+                response = self.bot.old_responses[self.ctx.message.id]
+                await response.edit(content=None, embed=self.pages[0], file=None, files=None, delete_after=None, allowed_mentions=None)
+                self.message = response
+            except KeyError:
+                self.message = response = await self.ctx.reply(embed=self.pages[0])
+                self.bot.old_responses[self.ctx.message.id] = response
 
         if len(self.pages) > 1:
             self.__tasks.append(self.loop.create_task(self.add_reactions()))
@@ -408,7 +426,12 @@ class Paginator:
         self.loop = ctx.bot.loop
 
         if isinstance(self.pages, discord.Embed):
-            return await self.ctx.reply(embed=self.pages)
+            try:
+                response = self.bot.old_responses[self.ctx.message.id]
+                return await response.edit(content=None, embed=self.pages, file=None, files=None, delete_after=None, allowed_mentions=None)
+            except KeyError:
+                response = await self.ctx.reply(embed=self.pages)
+                self.bot.old_responses[self.ctx.message.id] = response
 
         if not isinstance(self.pages, (list, discord.Embed)):
             raise TypeError(
