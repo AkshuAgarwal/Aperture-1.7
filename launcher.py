@@ -25,4 +25,5 @@ if __name__ == '__main__':
         except ImportError as exc:
             raise ImportError(
                 f"""Some Error Occured while Importing...
+                Error: {exc}
                 Try installing requirements manually by command 'pip3 install -r {__requirements__}' and run the launcher.py again""")

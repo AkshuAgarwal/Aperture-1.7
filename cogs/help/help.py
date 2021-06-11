@@ -1,5 +1,3 @@
-# Complete @commands.command fields and add cooldown
-
 from typing import Optional
 import datetime
 import asyncio
@@ -23,6 +21,9 @@ class Help(commands.Cog):
             ],
             "Fun Commands": [
                 "morse", "ascii"
+            ],
+            "Games Commands": [
+                "tictactoe"
             ],
             "Admin Commands": [
                 "setprefix", "enablecommand", "disablecommand", "enablechannel", "disablechannel"
@@ -116,9 +117,9 @@ class Help(commands.Cog):
 
             try:
                 response = self.client.old_responses[ctx.message.id]
-                return await response.edit(content=None, embed=embed, file=None, files=None, delete_after=None, allowed_mentions=None)
+                return await response.edit(content=f"> Tip: Use `{ctx.prefix}help --all` to get a list of all commands in your DMs!", embed=embed, file=None, files=None, delete_after=None, allowed_mentions=None)
             except KeyError:
-                response = await ctx.reply(embed=embed)
+                response = await ctx.reply(f"> Tip: Use `{ctx.prefix}help --all` to get a list of all commands in your DMs!", embed=embed)
                 self.client.old_responses[ctx.message.id] = response
                 return
         else:
@@ -137,13 +138,18 @@ class Help(commands.Cog):
         brief='Get some Help',
         description="To get Help for my Commands",
         usage="`help` `[command_name:str]` `[--all]`",
+        explained_usage=["**Command Name:** Name of the particular Command to get help for.", "**--all:** Adding `--all` after help will send you a full Command list in your DMs. Make sure you have your DMs on."],
         bot_permissions=['Manage Messages'],
+        cooldown='`1/5 sec` - [`User`]',
         examples=[
             'help',
             'help --all',
-            'help kick'
+            'help kick',
+            'help tictactoe'
         ]
     )
+    @commands.guild_only()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def _help(self, ctx, command_name: Optional[str] = None):
         if not command_name:
             await self.build_help(ctx)
