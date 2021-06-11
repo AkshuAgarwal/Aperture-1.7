@@ -8,5 +8,7 @@
     "cmd_permissions": ":lock:",
     "cmd_bot_permissions": ":closed_lock_with_key:",
     "cmd_cooldown": ":hourglass:",
-    "cmd_examples": ":mag:"
+    "cmd_examples": ":mag:",
+    "door": ":door:",
+    "loading": ":dvd:"
 }
