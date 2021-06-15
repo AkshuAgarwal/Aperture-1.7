@@ -9,3 +9,8 @@ CREATE TABLE IF NOT EXISTS guild_disabled (
     command_name VARCHAR(30)[],
     channel_id BIGINT[]
 );
+
+CREATE TABLE IF NOT EXISTS apertures_currency (
+    user_id BIGINT NOT NULL PRIMARY KEY,
+    balance INTEGER DEFAULT 0
+);

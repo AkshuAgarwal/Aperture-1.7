@@ -5,7 +5,7 @@ from contextlib import suppress
 import discord
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji
+from bot.main import NewCommand, Emoji, reply
 
 class TicTacToe(commands.Cog):
     def __init__(self, client):
@@ -63,9 +63,7 @@ class TicTacToe(commands.Cog):
         gamestatus.set_footer(text=f"Thanks for using {ctx.guild.me.name}", icon_url=ctx.guild.me.avatar_url)
         gamestatus.set_author(name=f"{ctx.guild.me.name} Games", icon_url=ctx.guild.me.avatar_url)
 
-        myboard = f"""{self.lte(keys[0])}{self.lte(keys[1])}{self.lte(keys[2])}
-{self.lte(keys[3])}{self.lte(keys[4])}{self.lte(keys[5])}
-{self.lte(keys[6])}{self.lte(keys[7])}{self.lte(keys[8])}"""
+        myboard = f"""{self.lte(keys[0])}{self.lte(keys[1])}{self.lte(keys[2])}\n{self.lte(keys[3])}{self.lte(keys[4])}{self.lte(keys[5])}\n{self.lte(keys[6])}{self.lte(keys[7])}{self.lte(keys[8])}"""
         await msg.edit(embed=gamestatus, content=myboard)
 
     async def start(self, ctx, response:discord.Message, players:list):
@@ -86,23 +84,26 @@ class TicTacToe(commands.Cog):
             if won:
                 if winner == 'x':
                     winner2 = players[0]
+                    loser2 = players[1]
                 elif winner == 'o':
                     winner2 = players[1]
+                    loser2 = players[0]
                 await response.clear_reactions()
-                myboard = f"""{self.lte(l[0])}{self.lte(l[1])}{self.lte(l[2])}
-{self.lte(l[3])}{self.lte(l[4])}{self.lte(l[5])}
-{self.lte(l[6])}{self.lte(l[7])}{self.lte(l[8])}"""
+                myboard = f"""{self.lte(l[0])}{self.lte(l[1])}{self.lte(l[2])}\n{self.lte(l[3])}{self.lte(l[4])}{self.lte(l[5])}\n{self.lte(l[6])}{self.lte(l[7])}{self.lte(l[8])}"""
+
+                async with self.client.pool.acquire() as conn:
+                    async with conn.transaction() as trans:
+                        await conn.execute("UPDATE apertures_currency SET balance = balance + 50 WHERE user_id=$1;", winner2.id)
+                        await conn.execute("UPDATE apertures_currency SET balance = balance - 50 WHERE user_id=$1;", loser2.id)
                 embed = discord.Embed(title=f"TicTacToe- {players[0]} vs {players[1]}",
-                                    description=f":tada: {winner2.mention} ({self.lte(winner)}) Won!",
+                                    description=f":tada: {winner2.mention} ({self.lte(winner)}) Won!\n\nAdded 50 Apertures to {winner2}'s and Deducted 50 from {loser2}'s Balance.",
                                     color=0x00eeff, timestamp=datetime.datetime.utcnow())
                 embed.set_footer(text=f"Thanks for using {ctx.guild.me.name}", icon_url=ctx.guild.me.avatar_url)
                 embed.set_author(name=f"{ctx.guild.me.name} Games", icon_url=ctx.guild.me.avatar_url)
                 return await response.edit(content=myboard, embed=embed)
             elif x == 9 and won is False:
                 await response.clear_reactions()
-                myboard = f"""{self.lte(l[0])}{self.lte(l[1])}{self.lte(l[2])}
-{self.lte(l[3])}{self.lte(l[4])}{self.lte(l[5])}
-{self.lte(l[6])}{self.lte(l[7])}{self.lte(l[8])}"""
+                myboard = f"""{self.lte(l[0])}{self.lte(l[1])}{self.lte(l[2])}\n{self.lte(l[3])}{self.lte(l[4])}{self.lte(l[5])}\n{self.lte(l[6])}{self.lte(l[7])}{self.lte(l[8])}"""
                 embed = discord.Embed(title=f"TicTacToe- {players[0]} vs {players[1]}",
                                     description=f"Match Draw!", color=0x00eeff, timestamp=datetime.datetime.utcnow())
                 embed.set_footer(text=f"Thanks for using {ctx.guild.me.name}", icon_url=ctx.guild.me.avatar_url)
@@ -161,7 +162,9 @@ class TicTacToe(commands.Cog):
         description="Starts a Match of Tic-Tac-Toe Game",
         help="""This command is used to Start a game of Tic-Tac-Toe which can be played by 2 Players against Each Other.
 In this Game, 2 players take turns marking the spaces in a 3×3 grid with the Symbols assigned to them (`X` and `O`).
-The player who succeeds in placing three of their marks in a diagonal, horizontal, or vertical row is the winner.""",
+The player who succeeds in placing three of their marks in a diagonal, horizontal, or vertical row is the winner.
+Both players need to have minimum 50 Apertures to Play the Game. The Winner will get a total of 100 Apertures Back while the other player will lose 50. No Win/lose on Tie!
+Need more info on Apertures? Use `currencyinfo` Comand!""",
         usage="`tictactoe`",
         bot_permissions=['Manage Messages'],
         cooldown="`1/15 sec` - [`User`]",
@@ -172,65 +175,78 @@ The player who succeeds in placing three of their marks in a diagonal, horizonta
     @commands.cooldown(1, 15, commands.BucketType.user)
     @commands.guild_only()
     async def _tictactoe(self, ctx):
-        players = [ctx.author]
-        redcross = self.client.get_emoji(int((Emoji.redcross)[-19:-1]))
-        greentick = self.client.get_emoji(int((Emoji.greentick)[-19:-1]))
-        emojis = ['🚪', redcross, greentick]
-        
-        try:
-            response = self.client.old_responses[ctx.message.id]
-            await response.edit(content=f"**A Game of TicTacToe is going to be Started!**\nReact on this Message with {emojis[0]} to Enter or {emojis[1]} to Cancel.\n> Players Required: 2, Timeout: 3 Minutes\n\n> Participants: {ctx.author.mention}", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
-        except KeyError:
-            response = await ctx.reply(f"**A Game of TicTacToe is going to be Started!**\nReact on this Message with {emojis[0]} to Enter or {emojis[1]} to Cancel.\n> Players Required: 2, Timeout: 3 Minutes\n\n> Participants: {ctx.author.mention}")
-            self.client.old_responses[ctx.message.id] = response
+        async with self.client.pool.acquire() as conn:
+            async with conn.transaction() as trans:
+                data = await conn.fetchrow("SELECT balance FROM apertures_currency WHERE user_id=$1;", ctx.author.id)
+                if not data:
+                    await conn.execute("INSERT INTO apertures_currency (user_id) VALUES ($1);", ctx.author.id)
+                    return await reply(self.client, ctx, "You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
+                elif int(data['balance']) < 50:
+                    return await reply(self.client, ctx, "You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
+                
+                players = [ctx.author]
+                redcross = self.client.get_emoji(int((Emoji.redcross)[-19:-1]))
+                greentick = self.client.get_emoji(int((Emoji.greentick)[-19:-1]))
+                emojis = ['🚪', redcross, greentick]
+                
+                response = await reply(self.client, ctx, f"**A Game of TicTacToe is going to be Started!**\nReact on this Message with {emojis[0]} to Enter or {emojis[1]} to Cancel.\n> Players Required: 2, Timeout: 3 Minutes, Apertures Required: 50/per Player\n\n> Participants: {ctx.author.mention}")
 
-        await response.add_reaction(emojis[0])
-        await response.add_reaction(emojis[1])
-
-        try:
-            def maincheck(reaction, user):
-                if reaction.message == response and not user.bot:
-                    if reaction.emoji == emojis[0] and user not in players:
-                        return True
-                    elif reaction.emoji == emojis[1] and user == ctx.author:
-                        return True
-                    else:
-                        return False
-                else:
-                    return False
-
-            reaction, user = await self.client.wait_for('reaction_add', timeout=180, check=maincheck)
-            
-            if reaction.emoji == emojis[0]:
-                players.append(user)
-                await response.edit(content=f"**A Game of TicTacToe is going to be Started!**\n> Players Required: 2, Timeout: 3 Minutes\n\n> Participants: {ctx.author.mention}, {user.mention}.\nReact with {emojis[2]} to Start or {emojis[1]} to Cancel!")
-
-                with suppress(Exception):
-                    await response.clear_reactions()
-                await response.add_reaction(emojis[2])
+                await response.add_reaction(emojis[0])
                 await response.add_reaction(emojis[1])
 
-                reaction, _ = await self.client.wait_for('reaction_add', timeout=180,
-                                check=lambda reaction, user: reaction.emoji in [emojis[1], emojis[2]] and user == ctx.author and reaction.message == response)
-                
-                if reaction.emoji == emojis[2]:
+                try:
+                    def maincheck(reaction, user):
+                        if reaction.message == response and not user.bot:
+                            if reaction.emoji == emojis[0] and user not in players:
+                                return True
+                            elif reaction.emoji == emojis[1] and user == ctx.author:
+                                return True
+                            else:
+                                return False
+                        else:
+                            return False
+                    
+                    invalid_player = True
+                    while invalid_player is True:
+                        reaction, user = await self.client.wait_for('reaction_add', timeout=180, check=maincheck)
+                        
+                        if reaction.emoji == emojis[0]:
+                            data = await conn.fetchrow("SELECT balance FROM apertures_currency WHERE user_id=$1;", user.id)
+                            if not data:
+                                await conn.execute("INSERT INTO apertures_currency (user_id) VALUES ($1);", user.id)
+                                await ctx.send(f"{user.mention}, You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
+                            elif int(data['balance']) < 50:
+                                await ctx.send(f"{user.mention}, You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
+                            else:
+                                players.append(user)
+                                await response.edit(content=f"**A Game of TicTacToe is going to be Started!**\n> Players Required: 2, Timeout: 3 Minutes, Apertures Required: 50/per Player\n\n> Participants: {ctx.author.mention}, {user.mention}.\nReact with {emojis[2]} to Start or {emojis[1]} to Cancel!")
+
+                                with suppress(Exception):
+                                    await response.clear_reactions()
+                                await response.add_reaction(emojis[2])
+                                await response.add_reaction(emojis[1])
+
+                                reaction, _ = await self.client.wait_for('reaction_add', timeout=180,
+                                                check=lambda reaction, user: reaction.emoji in [emojis[1], emojis[2]] and user == ctx.author and reaction.message == response)
+                                
+                                if reaction.emoji == emojis[2]:
+                                    await response.clear_reactions()
+                                    return await self.start(ctx, response, players)
+
+                                elif reaction.emoji == emojis[1]:
+                                    with suppress(Exception):
+                                        await response.clear_reactions()
+                                    return await response.edit(content=f"{Emoji.greentick} Cancelled the Match!")
+                        
+                        elif reaction.emoji == emojis[1]:
+                            with suppress(Exception):
+                                await response.clear_reactions()
+                            invalid_player = False
+                            return await response.edit(content=f"{Emoji.greentick} Cancelled the Match!")
+
+                except asyncio.exceptions.TimeoutError:
                     await response.clear_reactions()
-                    return await self.start(ctx, response, players)
-
-                elif reaction.emoji == emojis[1]:
-                    with suppress(Exception):
-                        await response.clear_reactions()
-                    return await response.edit(content=f"{Emoji.greentick} Cancelled the Match!")
-            
-            elif reaction.emoji == emojis[1]:
-                with suppress(Exception):
-                    await response.clear_reactions()
-                return await response.edit(content=f"{Emoji.greentick} Cancelled the Match!")
-
-        except asyncio.exceptions.TimeoutError:
-            await response.clear_reactions()
-            await response.edit(content="Timed out waiting for Players...")
-
+                    return await response.edit(content="Timed out waiting for Players...")
 
 
 def setup(client):
