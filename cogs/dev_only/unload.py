@@ -4,8 +4,7 @@ import discord
 from discord.ext import commands
 from bot.main import NewCommand
 
-from bot.main import Emoji
-from bot.main import Errors
+from bot.main import Emoji, Errors, reply
 
 class Unload(commands.Cog):
     def __init__(self, client):
@@ -36,22 +35,10 @@ The Cog should be in the Proper directory as set by the Developer.""",
                 if files.endswith('.py') and files[:-3] == cog_name:
                     self.client.unload_extension(f"cogs.{folders.name}.{files[:-3]}")
                     _found = True
-                    try:
-                        response = self.client.old_responses[ctx.message.id]
-                        return await response.edit(content=f"{Emoji.greentick} Successfully Unloaded `{cog_name}.py`", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
-                    except KeyError:
-                        response = await ctx.reply(f"{Emoji.greentick} Successfully Unloaded `{cog_name}.py`")
-                        self.client.old_responses[ctx.message.id] = response
-                        return
+                    return await reply(self.client, ctx, f"{Emoji.greentick} Successfully Unloaded `{cog_name}.py`")
         
         if _found is False:
-            try:
-                response = self.client.old_responses[ctx.message.id]
-                return await response.edit(content=f"{Emoji.redcross} No file named `{cog_name}` Found", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
-            except KeyError:
-                response = await ctx.reply(f"{Emoji.redcross} No file named `{cog_name}` Found")
-                self.client.old_responses[ctx.message.id] = response
-                return
+            return await reply(self.client, ctx, f"{Emoji.redcross} No file named `{cog_name}` Found")
 
     @_unload.error
     async def _unload_error(self, ctx, error):

@@ -2,7 +2,7 @@ from typing import Optional
 
 from discord.ext import commands
 
-from bot.main import NewCommand, Errors, Emoji
+from bot.main import NewCommand, Errors, Emoji, reply
 
 class SetPrefix(commands.Cog):
     def __init__(self, client):
@@ -39,25 +39,13 @@ You can also choose whether you want the Prefix to be Case Insensitive, i.e., if
         elif case_insensitive.lower() in ["false", "f"]:
             case = False
         else:
-            try:
-                response = self.client.old_responses[ctx.message.id]
-                return await response.edit(content=f"{Emoji.redcross} `{case_insensitive}` is not a Valid Boolean Type Accepted by the Bot...\nChoose from `True/t` or `False/f`", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
-            except KeyError:
-                response = await ctx.reply(f"{Emoji.redcross} `{case_insensitive}` is not a Valid Boolean Type Accepted by the Bot...\nChoose from `True/t` or `False/f`")
-                self.client.old_responses[ctx.message.id] = response
-                return
+            return await reply(self.client, ctx, f"{Emoji.redcross} `{case_insensitive}` is not a Valid Boolean Type Accepted by the Bot...\nChoose from `True/t` or `False/f`")
 
         async with self.client.pool.acquire() as conn:
             async with conn.transaction() as trans:
                 await conn.execute("UPDATE guild_data SET prefix=$1, prefix_case_insensitive=$2 WHERE guild_id=$3;", prefix, case, ctx.guild.id)
                 self.client.prefixes[ctx.guild.id] = [prefix, case]
-                try:
-                    response = self.client.old_responses[ctx.message.id]
-                    return await response.edit(content=f"{Emoji.greentick} Successfully Changed prefix for this Server to `{prefix}`!", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
-                except KeyError:
-                    response = await ctx.reply(f"{Emoji.greentick} Successfully Changed prefix for this Server to `{prefix}`!")
-                    self.client.old_responses[ctx.message.id] = response
-                    return
+                return await reply(self.client, ctx, f"{Emoji.greentick} Successfully Changed prefix for this Server to `{prefix}`!")
 
     @_setprefix.error
     async def _setprefix_error(self, ctx, error):

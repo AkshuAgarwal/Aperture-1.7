@@ -1,6 +1,7 @@
 import asyncio
 import asyncpg
 from discord.ext import commands
+from discord import Message
 
 from bot.main import Emoji
 
@@ -47,3 +48,21 @@ async def is_disabled(client, ctx: commands.Context):
             return False
         else:
             return True
+
+async def send(client, ctx, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None, allowed_mentions=None, reference=None, mention_author=None) -> Message:
+    try:
+        response = client.old_responses[ctx.message.id]
+        await response.edit(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions, reference=reference, mention_author=mention_author)
+    except KeyError:
+        response = await ctx.send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions, reference=reference, mention_author=mention_author)
+        client.old_responses[ctx.message.id] = response
+    return response
+
+async def reply(client, ctx, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None) -> Message:
+    try:
+        response = client.old_responses[ctx.message.id]
+        await response.edit(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
+    except KeyError:
+        response = await ctx.reply(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
+        client.old_responses[ctx.message.id] = response
+    return response

@@ -2,12 +2,10 @@ from typing import Optional
 import datetime
 import asyncio
 
-import discord
+from discord import utils, Embed
 from discord.ext import commands
 
-from bot.main import NewCommand
-from bot.main import Emoji
-from bot.main import Paginator
+from bot.main import NewCommand, Emoji, Paginator, reply
 
 class Help(commands.Cog):
     def __init__(self, client):
@@ -38,13 +36,13 @@ class Help(commands.Cog):
         for key, value in data.items():
             _command_data = []
             for commands in value:
-                _command = discord.utils.find(lambda cmd: cmd.name == commands, all_commands)
+                _command = utils.find(lambda cmd: cmd.name == commands, all_commands)
                 _command_data.append((_command.name, _command.brief))
 
             _description=f"• {ctx.prefix}"+ f"\n• {ctx.prefix}".join(f"{cmd_name} → {cmd_brief}" for (cmd_name, cmd_brief) in _command_data)
             _command_data.clear()
 
-            embed = discord.Embed(
+            embed = Embed(
                 title=key,
                 description=_description,
                 color=0x00EEFF,
@@ -62,9 +60,9 @@ class Help(commands.Cog):
 
 
     async def get_command_help(self, ctx: commands.Context, command_name:str):
-        command = discord.utils.find(lambda cmd: cmd.name == command_name or command_name in cmd.aliases, self.client.commands)
+        command = utils.find(lambda cmd: cmd.name == command_name or command_name in cmd.aliases, self.client.commands)
         if command is not None:
-            embed = discord.Embed(
+            embed = Embed(
                 title=f"Help for {command.name} Command",
                 description=f"{command.description}",
                 color=0x00EEFF,
@@ -115,21 +113,9 @@ class Help(commands.Cog):
             embed.add_field(name=f"{Emoji.cmd_examples} | Examples",
                 value=_cmd_examples, inline=False)
 
-            try:
-                response = self.client.old_responses[ctx.message.id]
-                return await response.edit(content=f"> Tip: Use `{ctx.prefix}help --all` to get a list of all commands in your DMs!", embed=embed, file=None, files=None, delete_after=None, allowed_mentions=None)
-            except KeyError:
-                response = await ctx.reply(f"> Tip: Use `{ctx.prefix}help --all` to get a list of all commands in your DMs!", embed=embed)
-                self.client.old_responses[ctx.message.id] = response
-                return
+            return await reply(self.client, ctx, f"> Tip: Use `{ctx.prefix}help --all` to get a list of all commands in your DMs!", embed=embed)
         else:
-            try:
-                response = self.client.old_responses[ctx.message.id]
-                return await response.edit(content=f"{Emoji.redcross} No Command named `{command_name}` Found!", embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
-            except KeyError:
-                response = await ctx.reply(f"{Emoji.redcross} No Command named `{command_name}` Found!")
-                self.client.old_responses[ctx.message.id] = response
-                return
+            return await reply(self.client, ctx, f"{Emoji.redcross} No Command named `{command_name}` Found!")
 
 
     @commands.command(
@@ -154,7 +140,7 @@ class Help(commands.Cog):
         if not command_name:
             await self.build_help(ctx)
         elif command_name == '--all':
-            return await ctx.reply("Command Making is in Progress...")
+            return await reply(self.client, ctx, "Command Making is in Progress...")
         else:
             await self.get_command_help(ctx, command_name)
 

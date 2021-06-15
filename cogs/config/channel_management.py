@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, Errors
+from bot.main import NewCommand, Emoji, Errors, reply
 
 class ChannelManagement(commands.Cog):
     def __init__(self, client):
@@ -52,13 +52,7 @@ All the Commands of the Bot cannot be used in that Channel but still be operatab
                         'channel_id': row['channel_id']
                     }
 
-        try:
-            response = self.client.old_responses[ctx.message.id]
-            return await response.edit(content=resp, embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
-        except KeyError:
-            response = await ctx.reply(resp)
-            self.client.old_responses[ctx.message.id] = response
-            return
+        return await reply(self.client, ctx, resp)
 
     @_disablechannel.error
     async def _disablechannel_error(self, ctx, error):
@@ -106,13 +100,7 @@ Only works if the Bot was already Disabled in that Channel.""",
                         'channel_id': row['channel_id']
                     }
 
-        try:
-            response = self.client.old_responses[ctx.message.id]
-            return await response.edit(content=resp, embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
-        except KeyError:
-            response = await ctx.reply(resp)
-            self.client.old_responses[ctx.message.id] = response
-            return
+        return await reply(self.client, ctx, resp)
 
     @_enablechannel.error
     async def _enablechannel_error(self, ctx, error):

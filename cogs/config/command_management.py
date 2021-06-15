@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, Errors
+from bot.main import NewCommand, Emoji, Errors, reply
 
 class CommandManagement(commands.Cog):
     def __init__(self, client):
@@ -62,13 +62,7 @@ You can also use Command Alias instead of it's Name to Disable it.""",
                             'channel_id': row['channel_id']
                         }
 
-        try:
-            response = self.client.old_responses[ctx.message.id]
-            return await response.edit(content=resp, embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
-        except KeyError:
-            response = await ctx.reply(resp)
-            self.client.old_responses[ctx.message.id] = response
-            return
+        return await reply(self.client, ctx, resp)
 
     @_disablecommand.error
     async def _disablecommand_error(self, ctx, error):
@@ -124,13 +118,7 @@ You can also use Command Alias instead of it's Name to Enable it.""",
                             'channel_id': row['channel_id']
                         }
 
-        try:
-            response = self.client.old_responses[ctx.message.id]
-            return await response.edit(content=resp, embed=None, file=None, files=None, delete_after=None, allowed_mentions=None)
-        except KeyError:
-            response = await ctx.reply(resp)
-            self.client.old_responses[ctx.message.id] = response
-            return
+        return await reply(self.client, ctx, resp)
 
     @_enablecommand.error
     async def _enablecommand_error(self, ctx, error):
