@@ -1,6 +1,5 @@
 from typing import Optional
 import datetime
-import asyncio
 
 from discord import utils, Embed
 from discord.ext import commands
@@ -14,27 +13,14 @@ class Help(commands.Cog):
 
     async def build_help(self, ctx: commands.Context):
         data = {
-            "General Commands": [
-                "ping", "uptime" ,"help"
-            ],
-            "Fun Commands": [
-                "morse", "ascii"
-            ],
-            "Games Commands": [
-                "tictactoe"
-            ],
-            "Currency Commands": [
-                'createaccount', 'balance'
-            ],
-            "Admin Commands": [
-                "setprefix", "enablecommand", "disablecommand", "enablechannel", "disablechannel"
-            ],
-            "Miscellaneous Commands": [
-                'avatar'
-            ],
-            "Developer Commands": [
-                "eval", "sql", "load", "unload", "reload"
-            ],
+            "General Commands": ["ping", "uptime", "help"],
+            "Games Commands": ["tictactoe"],
+            "Currency Commands": ['createaccount', 'currencyinfo', 'balance'],
+            "Actions Commands": ['hug', 'kiss'],
+            "Fun Commands": ["morse", "ascii"],
+            "Admin Commands": ["setprefix", "enablecommand", "disablecommand", "enablechannel", "disablechannel"],
+            "Miscellaneous Commands": ['avatar'],
+            "Developer Commands": ["eval", "sql", "load", "unload", "reload"],
         }
         all_commands = self.client.commands
         _embeds = []
