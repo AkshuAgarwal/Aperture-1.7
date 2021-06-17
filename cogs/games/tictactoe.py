@@ -55,7 +55,7 @@ class TicTacToe(commands.Cog):
 
     async def board(self, ctx, msg, players:list, keys:list, turn:list):
         gamestatus = discord.Embed(
-            title=f"TicTacToe- {players[0]} vs {players[1]}",
+            title=f"TicTacToe - {players[0].name} vs {players[1].name}",
             description=f"It's {turn[1].mention}'s ({self.lte(turn[0])}) Turn",
             color=0x00eeff,
             timestamp=datetime.datetime.utcnow()
@@ -95,8 +95,8 @@ class TicTacToe(commands.Cog):
                     async with conn.transaction() as trans:
                         await conn.execute("UPDATE apertures_currency SET balance = balance + 50 WHERE user_id=$1;", winner2.id)
                         await conn.execute("UPDATE apertures_currency SET balance = balance - 50 WHERE user_id=$1;", loser2.id)
-                embed = discord.Embed(title=f"TicTacToe- {players[0]} vs {players[1]}",
-                                    description=f":tada: {winner2.mention} ({self.lte(winner)}) Won!\n\nAdded 50 Apertures to {winner2}'s and Deducted 50 from {loser2}'s Balance.",
+                embed = discord.Embed(title=f"TicTacToe - {players[0].name} vs {players[1].name}",
+                                    description=f":tada: {winner2.mention} ({self.lte(winner)}) Won!\n\n{winner2.mention} → +50 Apertures\n{loser2.mention} → -50 Apertures",
                                     color=0x00eeff, timestamp=datetime.datetime.utcnow())
                 embed.set_footer(text=f"Thanks for using {ctx.guild.me.name}", icon_url=ctx.guild.me.avatar_url)
                 embed.set_author(name=f"{ctx.guild.me.name} Games", icon_url=ctx.guild.me.avatar_url)
@@ -104,7 +104,7 @@ class TicTacToe(commands.Cog):
             elif x == 9 and won is False:
                 await response.clear_reactions()
                 myboard = f"""{self.lte(l[0])}{self.lte(l[1])}{self.lte(l[2])}\n{self.lte(l[3])}{self.lte(l[4])}{self.lte(l[5])}\n{self.lte(l[6])}{self.lte(l[7])}{self.lte(l[8])}"""
-                embed = discord.Embed(title=f"TicTacToe- {players[0]} vs {players[1]}",
+                embed = discord.Embed(title=f"TicTacToe - {players[0].name} vs {players[1].name}",
                                     description=f"Match Draw!", color=0x00eeff, timestamp=datetime.datetime.utcnow())
                 embed.set_footer(text=f"Thanks for using {ctx.guild.me.name}", icon_url=ctx.guild.me.avatar_url)
                 embed.set_author(name=f"{ctx.guild.me.name} Games", icon_url=ctx.guild.me.avatar_url)
@@ -117,7 +117,7 @@ class TicTacToe(commands.Cog):
                         reaction, user = await self.client.wait_for('reaction_add', timeout=180, check=lambda reaction, user: user.id == players[0].id and not user.bot and reaction.emoji in valid_emojis and reaction.message == response)
                         await response.clear_reaction(reaction.emoji)
                     except asyncio.exceptions.TimeoutError:
-                        embed = discord.Embed(title=f"TicTacToe- {players[0]} vs {players[1]}",
+                        embed = discord.Embed(title=f"TicTacToe - {players[0].name} vs {players[1].name}",
                                             description=f"Timed Out Waiting for Response! Please Restart the Match...",
                                             color=0x00eeff, timestamp=datetime.datetime.utcnow())
                         embed.set_footer(text=f"Thanks for using {ctx.guild.me.name}", icon_url=ctx.guild.me.avatar_url)
@@ -138,7 +138,7 @@ class TicTacToe(commands.Cog):
 
                         await response.clear_reaction(reaction.emoji)
                     except asyncio.exceptions.TimeoutError:
-                        embed = discord.Embed(title=f"TicTacToe- {players[0]} vs {players[1]}",
+                        embed = discord.Embed(title=f"TicTacToe - {players[0].name} vs {players[1].name}",
                                             description=f"Timed Out Waiting for Response! Please Restart the Match...",
                                             color=0x00eeff, timestamp=datetime.datetime.utcnow())
                         embed.set_footer(text=f"Thanks for using {ctx.guild.me.name}", icon_url=ctx.guild.me.avatar_url)
@@ -179,8 +179,7 @@ Need more info on Apertures? Use `currencyinfo` Comand!""",
             async with conn.transaction() as trans:
                 data = await conn.fetchrow("SELECT balance FROM apertures_currency WHERE user_id=$1;", ctx.author.id)
                 if not data:
-                    await conn.execute("INSERT INTO apertures_currency (user_id) VALUES ($1);", ctx.author.id)
-                    return await reply(self.client, ctx, "You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
+                    return await reply(self.client, ctx, f"{Emoji.redcross} You need to have an Apertures Currency Account to play Games or use commands that involves use of Bot Currency!\n\n> Use `{ctx.prefix}createaccount` to Create an Account and get Started.")
                 elif int(data['balance']) < 50:
                     return await reply(self.client, ctx, "You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
                 
@@ -213,8 +212,7 @@ Need more info on Apertures? Use `currencyinfo` Comand!""",
                         if reaction.emoji == emojis[0]:
                             data = await conn.fetchrow("SELECT balance FROM apertures_currency WHERE user_id=$1;", user.id)
                             if not data:
-                                await conn.execute("INSERT INTO apertures_currency (user_id) VALUES ($1);", user.id)
-                                await ctx.send(f"{user.mention}, You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
+                                return await reply(self.client, ctx, f"{Emoji.redcross} You need to have an Apertures Currency Account to play Games or use commands that involves use of Bot Currency!\n\n> Use `{ctx.prefix}createaccount` to Create an Account and get Started.")
                             elif int(data['balance']) < 50:
                                 await ctx.send(f"{user.mention}, You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
                             else:

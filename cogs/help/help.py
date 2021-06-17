@@ -15,7 +15,7 @@ class Help(commands.Cog):
     async def build_help(self, ctx: commands.Context):
         data = {
             "General Commands": [
-                "ping", "help"
+                "ping", "uptime" ,"help"
             ],
             "Fun Commands": [
                 "morse", "ascii"
@@ -23,8 +23,14 @@ class Help(commands.Cog):
             "Games Commands": [
                 "tictactoe"
             ],
+            "Currency Commands": [
+                'createaccount', 'balance'
+            ],
             "Admin Commands": [
                 "setprefix", "enablecommand", "disablecommand", "enablechannel", "disablechannel"
+            ],
+            "Miscellaneous Commands": [
+                'avatar'
             ],
             "Developer Commands": [
                 "eval", "sql", "load", "unload", "reload"
@@ -124,7 +130,10 @@ class Help(commands.Cog):
         brief='Get some Help',
         description="To get Help for my Commands",
         usage="`help` `[command_name:str]` `[--all]`",
-        explained_usage=["**Command Name:** Name of the particular Command to get help for.", "**--all:** Adding `--all` after help will send you a full Command list in your DMs. Make sure you have your DMs on."],
+        explained_usage=[
+            "**Command Name:** Name of the particular Command to get help for.",
+            "**--all:** Adding `--all` after help will send you a full Command list in your DMs. Make sure you have your DMs on."
+        ],
         bot_permissions=['Manage Messages'],
         cooldown='`1/5 sec` - [`User`]',
         examples=[

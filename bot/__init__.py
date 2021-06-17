@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import json
 import traceback
@@ -98,6 +99,7 @@ class Bot(_IPCBot):
         self.prefixes = {}
         self.disabled_data = {}
         self.time_limit = 120
+        self.launch_time = datetime.utcnow()
 
         self.COGS = list()
         for folders in os.scandir("./cogs"):
@@ -114,7 +116,7 @@ class Bot(_IPCBot):
             print(f"+[COG] --> {folder_name}/{file_name}")
 
         self.load_extension('jishaku')
-        
+
         print(f"Loaded Cogs Successfully! Total Cogs: {len(self.COGS)}")
 
 
@@ -167,7 +169,7 @@ class Bot(_IPCBot):
         TOKEN = credentials['token']
         print('Running the Client...')
         super().run(TOKEN, reconnect=True)
-    
+
     async def close(self) -> None:
         print("Shutting Down...")
         self.scheduler.shutdown()
@@ -191,7 +193,7 @@ class Bot(_IPCBot):
 
         self.scheduler.start()
         print(f"Scheduler Started [{len(self.scheduler.get_jobs()):,} job(s) Scheduled]")
-        
+
         self.ready = True
         print("Client Ready!")
 
@@ -240,3 +242,10 @@ async def on_command_completion(ctx):
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(create_pool(client, loop))
+
+# Add currencyinfo command
+# Method to Add users to currency table
+# Complete and check ttt with coins
+# setup currency system
+# Fix Avatar Command: user:Union.....
+# Fix error console logging
