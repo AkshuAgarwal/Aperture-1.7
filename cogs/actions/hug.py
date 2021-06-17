@@ -14,15 +14,23 @@ class Hug(commands.Cog):
     def randomise(self, users:list):
         messages = [
             f'{users[0]} hugs {users[1]}!',
-            f'{users[0]} gives {users[1]} a big hug!'
+            f'{users[0]} gives {users[1]} a big hug!',
+            f'{users[0]} gives a huge hug to {users[1]}!',
         ]
         gifs = [
-            'https://media1.tenor.com/images/a211f33e4ff688f9101a46ed95f2fb21/tenor.gif',
-            'https://media1.tenor.com/images/4d89d7f963b41a416ec8a55230dab31b/tenor.gif',
-            'https://media1.tenor.com/images/f5df55943b64922b6b16aa63d43243a6/tenor.gif',
-            'https://media1.tenor.com/images/506aa95bbb0a71351bcaa753eaa2a45c/tenor.gif',
-            'https://media1.tenor.com/images/969f0f462e4b7350da543f0231ba94cb/tenor.gif',
-            'https://media1.tenor.com/images/53c1172d85491e363ce58b20ba83cdab/tenor.gif'
+            'https://media.giphy.com/media/PHZ7v9tfQu0o0/giphy.gif',
+            'https://media.giphy.com/media/od5H3PmEG5EVq/giphy.gif',
+            'https://media.giphy.com/media/GMFUrC8E8aWoo/giphy.gif',
+            'https://media.giphy.com/media/svXXBgduBsJ1u/giphy.gif',
+            'https://media.giphy.com/media/QFPoctlgZ5s0E/giphy.gif',
+            'https://media.giphy.com/media/3bqtLDeiDtwhq/giphy.gif',
+            'https://media.giphy.com/media/sUIZWMnfd4Mb6/giphy.gif',
+            'https://media.giphy.com/media/lrr9rHuoJOE0w/giphy.gif',
+            'https://media.giphy.com/media/du8yT5dStTeMg/giphy.gif',
+            'https://media.giphy.com/media/l2QDM9Jnim1YVILXa/giphy.gif',
+            'https://media.giphy.com/media/DjczAlIcyK1Co/giphy.gif',
+            'https://media.giphy.com/media/2A75Y6NodD38I/giphy.gif',
+            'https://media.giphy.com/media/10BcGXjbHOctZC/giphy.gif',
         ]
 
         return (choice(gifs), choice(messages))
