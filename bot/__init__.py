@@ -6,29 +6,29 @@ import asyncio
 import itertools
 from pytz import utc
 from contextlib import suppress
+from dotenv import load_dotenv
 
 import asyncpg
 import discord
 from discord import Intents
-from discord.ext import commands, tasks, ipc
+from discord.ext import commands, tasks
 from discord.ext.commands import Bot as BotBase
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from .main import is_disabled
 
-with open("./data/credentials.json", "r", encoding="utf-8") as f:
-    credentials = json.load(f)
+load_dotenv('./.env')
 
 with open("./data/botdata.json", "r", encoding="utf-8") as f:
     botdata = json.load(f)
 
 async def create_pool(client, loop) -> None:
     client.pool = await asyncpg.create_pool(
-        host=credentials["database"]["host"],
-        port=credentials["database"]["port"],
-        user=credentials["database"]["user"],
-        password=credentials["database"]["pswd"],
-        database=credentials["database"]["db"],
+        host=os.getenv('DB_HOST'),
+        port=os.getenv('DB_PORT'),
+        user=os.getenv('DB_USERNAME'),
+        password=os.getenv('DB_PASSWORD'),
+        database=os.getenv('DB_NAME'),
         loop=loop,
         min_size=1,
         max_size=100
@@ -65,24 +65,7 @@ async def get_prefix(client, message):
                         await conn.execute("INSERT INTO guild_data (guild_id, prefix, prefix_case_insensitive) VALUES ($1, $2, true);", message.guild.id, default_prefix)
                         return list(map(''.join, itertools.product(*zip(str(default_prefix).upper(), str(default_prefix).lower()))))
 
-class _IPCBot(BotBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.ipc = ipc.Server(self, secret_key=credentials["ipc_secret_key"])
-        self.load_extension("cogs.dashboard.dashboard_ipc")
-
-    async def on_ready(self):
-        print("Client [IPC Class] Ready!")
-
-    async def on_ipc_ready(self):
-        print("IPC Server Ready!")
-
-    async def on_ipc_error(self, endpoint, error):
-        print(f"IPCError -- Endpoint: {endpoint} - Error: {error}")
-
-
-class Bot(_IPCBot):
+class Bot(BotBase):
     def __init__(self):
         super().__init__(
             command_prefix=get_prefix,
@@ -104,7 +87,7 @@ class Bot(_IPCBot):
         self.COGS = list()
         for folders in os.scandir("./cogs"):
             for files in os.listdir(f"./cogs/{folders.name}"):
-                if files.endswith(".py") and files != "dashboard_ipc.py":
+                if files.endswith(".py"):
                     self.COGS.append((folders.name, files))
 
         self.loop.create_task(self.startup())
@@ -164,9 +147,8 @@ class Bot(_IPCBot):
 
         print('Setting up...')
         self.setup()
-        self.ipc.start()
 
-        TOKEN = credentials['token']
+        TOKEN = os.getenv('TOKEN')
         print('Running the Client...')
         super().run(TOKEN, reconnect=True)
 

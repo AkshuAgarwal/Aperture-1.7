@@ -1,4 +1,8 @@
-credentials.json
 __pycache__
+.env
 .vs
+.vscode
 .idea
+
+# Some Archived/Junk Files no longer used or used for Testing
+archive
