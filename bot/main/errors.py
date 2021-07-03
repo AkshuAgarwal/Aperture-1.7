@@ -1,95 +1,94 @@
-import discord
-from discord.ext import commands
-from . import Emoji as e
+import sys
+import traceback
+from contextlib import suppress
 
-class Errors:
-    def __init__(self, ctx, error):
-        self.ctx = ctx
-        self.error = error
+from discord.ext.commands import *
 
-    async def response(self):
-        error = self.error
-        if isinstance(error, commands.MissingRequiredArgument):
-            await self.ctx.reply(f" {e.redcross} **Missing Required Argument(s)!**\n> Missing Parameters: `{error.param}`\n> Usage: {self.ctx.command.usage}")
-        if isinstance(error, commands.TooManyArguments):
-            await self.ctx.reply(f"{e.redcross} **Too Many Argument(s)!**\n> Usage: {self.ctx.command.usage}")
-        if isinstance(error, commands.MessageNotFound):
-            await self.ctx.reply(f"{e.redcross} **Message not Found!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.MemberNotFound):
-            await self.ctx.reply(f"{e.redcross} **Member not Found!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.GuildNotFound):
-            await self.ctx.reply(f"{e.redcross} **Guild not Found!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.UserNotFound):
-            await self.ctx.reply(f"{e.redcross} **User not Found!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.ChannelNotFound):
-            await self.ctx.reply(f"{e.redcross} **Message not Found!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.ChannelNotReadable):
-            await self.ctx.reply(f"{e.redcross} **I am Missing Permissions to read the Messages in the Channel!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.BadColourArgument):
-            await self.ctx.reply(f"{e.redcross} **Bad Color Argument!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.RoleNotFound):
-            await self.ctx.reply(f"{e.redcross} **Role not Found!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.BadInviteArgument):
-            await self.ctx.reply(f"{e.redcross} **Invite passed is Invallid or Expired!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.EmojiNotFound):
-            await self.ctx.reply(f"{e.redcross} **Emoji not Found!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.PartialEmojiConversionFailure):
-            await self.ctx.reply(f"{e.redcross} **Emoji passed does not match the correct Format!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.BadBoolArgument):
-            await self.ctx.reply(f"{e.redcross} **Invaild Boolean Argument!**\n> Argument Passed: `{error.argument}`")
-        if isinstance(error, commands.BadUnionArgument):
-            await self.ctx.reply(f"{e.redcross} **Invalid Arguments Passed!**\n> Invaild Arguments: `{error.param}`\n> Usage: {self.ctx.command.usage}")
-        if isinstance(error, commands.UnexpectedQuoteError):
-            await self.ctx.reply(f"{e.redcross} **Unexpected Quote Found!**\n> Unexpected Quote: `{error.quote}`")
-        if isinstance(error, commands.InvalidEndOfQuotedStringError):
-            await self.ctx.reply(f"{e.redcross} **String Quoting Error!**\n> Invalid Characters Found: `{error.char}`")
-        if isinstance(error, commands.ExpectedClosingQuoteError):
-            await self.ctx.reply(f"{e.redcross} **Closing Quote Expected!**\n> Quote Expected: `{error.close_quote}`")
-        if isinstance(error, commands.CheckAnyFailure):
-            raise error
-        if isinstance(error, commands.PrivateMessageOnly):
-            await self.ctx.reply(f"{e.redcross} **An Operation in this command only works in Private Messages (DMs)**")
-        if isinstance(error, commands.NoPrivateMessage):
-            await self.ctx.reply(f"{e.redcross} **An Operation in this command don't work in Private Messages (DMs)**")
-        if isinstance(error, commands.NotOwner):
-            await self.ctx.reply(f"{e.redcross} **This is a Developer-Only Command!**")
-        if isinstance(error, commands.MissingPermissions):
-            missing_perms = ", ".join(f"`{i}`" for i in error.missing_perms)
-            required_perms = ", ".join(f"`{i}`" for i in self.ctx.command.permissions)
-            await self.ctx.reply(f"**{e.redcross} You are missing Permissions to use this Command!**\n> Missing Permission(s): `{missing_perms}`\n> Required Permission(s): {required_perms}")
-        if isinstance(error, commands.BotMissingPermissions):
-            bot_missing_perms = ", ".join(f"`{i}`" for i in error.missing_perms)
-            bot_required_perms = ", ".join(f"`{i}`" for i in self.ctx.command.bot_permissions)
-            await self.ctx.reply(f"**{e.redcross} I am missing some Permissions to use this Command!**\n> Missing Permission(s): `{bot_missing_perms}`\n> Required Permission(s): {bot_required_perms}")
-        if isinstance(error, commands.MissingRole):
-            await self.ctx.reply(f"**{e.redcross} You are Missing Role to use this Command!**\n> Missing Role: `{error.missing_role}`")
-        if isinstance(error, commands.BotMissingRole):
-            await self.ctx.reply(f"**{e.redcross} I am Missing Role to use this Command!**\n> Missing Role: `{error.missing_role}`")
-        if isinstance(error, commands.MissingAnyRole):
-            missing_roles = ', '.join(f"`{i}`" for i in error.missing_roles)
-            await self.ctx.reply(f"**{e.redcross} You are Missing some Roles to use this Command!**\n> Missing Role(s): {missing_roles}")
-        if isinstance(error, commands.BotMissingAnyRole):
-            bot_missing_roles = ', '.join(f"`{i}`" for i in error.missing_roles)
-            await self.ctx.reply(f"**{e.redcross} I am Missing some Roles to use this Command!**\n> Missing Role(s): {bot_missing_roles}")
-        if isinstance(error, commands.NSFWChannelRequired):
-            await self.ctx.reply(f"**{e.redcross} This command is restricted to NSFW Channels only!**")
-        if isinstance(error, commands.DisabledCommand):
-            await self.ctx.reply(f"**{e.redcross} The Command is Disabled!**")
-        if isinstance(error, commands.CommandInvokeError):
-            await self.ctx.reply(f"**{e.redcross} Some Error occured while Invoking the Command!**\n> Error: `{error.original}`")
-        if isinstance(error, commands.CommandOnCooldown):
-            await self.ctx.reply(f"**{e.redcross} The Command is currently on `{str(error.cooldown.type)[11:]}` Cooldown!**\n> Retry After: `{error.retry_after:,.0f} seconds`")
-        if isinstance(error, commands.MaxConcurrencyReached):
-            await self.ctx.reply(f"**{e.redcross} The Command has reached it's Max Concurrency of `{error.number}` per `{error.per}`! Please try again after some time...**")
-        if isinstance(error, commands.ExtensionAlreadyLoaded):
-            await self.ctx.reply(f"**{e.redcross} The Extension `{error.name}` is Already Loaded!**")
-        if isinstance(error, commands.ExtensionNotLoaded):
-            await self.ctx.reply(f"**{e.redcross} The Extension `{error.name}` is not Loaded!**")
-        if isinstance(error, commands.ExtensionFailed):
-            await self.ctx.reply(f"**{e.redcross} Failed to Load the Extension `{error.name}`!**\n> Error: `{error.original}`")
-        if isinstance(error, commands.ExtensionNotFound):
-            await self.ctx.reply(f"**{e.redcross} Extension `{error.name}` not Found!**")
-        if isinstance(error, (discord.Forbidden, discord.NotFound, discord.DiscordServerError)):
-            raise error
+async def error_handler(ctx: Context, error):
+    ignored = (CommandNotFound, )
+    error = getattr(error, 'original', error)
 
-        raise error
+    if ctx.command.has_error_handler():
+        return
+
+    if isinstance(error, ignored):
+        return
+    elif isinstance(error, MissingRequiredArgument):
+        await ctx.reply(f'Missing Required Argument!\nMissing Arguments: `{error.param}`\n> Usage: `{ctx.prefix}{ctx.invoked_with} {ctx.command.usage}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+    elif isinstance(error, TooManyArguments):
+        await ctx.reply(f'Too Many Arguments!\n> Usage: `{ctx.prefix}{ctx.invoked_with} {ctx.command.usage}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+    elif isinstance(error, MessageNotFound):
+        await ctx.reply(f'Unable to find Message!\n> Argument passed: `{error.argument}`')
+    elif isinstance(error, MemberNotFound):
+        await ctx.reply(f'Unable to find Member!\n> Argument passed: `{error.argument}`')
+    elif isinstance(error, UserNotFound):
+        await ctx.reply(f'Unable to find User!\n> Argument passed: `{error.argument}`')
+    elif isinstance(error, ChannelNotFound):
+        await ctx.reply(f'Unable to find Channel!\n> Argument passed: `{error.argument}`')
+    elif isinstance(error, ChannelNotReadable):
+        await ctx.reply(f'I am missing Permissions to read a Required Channel!\n> Channel: `{error.argument.mention}`')
+    elif isinstance(error, BadColourArgument):
+        await ctx.reply(f'The Color argument is not Valid.\n> Color: `{error.argument}`')
+    elif isinstance(error, RoleNotFound):
+        await ctx.reply(f'Unable to find Role!\n> Argument passed: `{error.argument}`')
+    elif isinstance(error, BadInviteArgument):
+        await ctx.reply(f'The Invite is either Invalid or Expired!')
+    elif isinstance(error, EmojiNotFound):
+        await ctx.reply(f'Unable to find Emoji!\n> Argument passed: `{error.argument}`')
+    elif isinstance(error, PartialEmojiConversionFailure):
+        await ctx.reply(f'Emoji does not match the correct format!\n> Arguments passed: `{error.argument}`')
+    elif isinstance(error, BadBoolArgument):
+        await ctx.reply(f'Boolean Argument does not match the valid format!\n> Arguments passed: `{error.argument}`')
+    elif isinstance(error, BadUnionArgument):
+        await ctx.reply(f'Invaild Inupt type passed in Arguments!\n> Parameter failed: {error.param}\n> Valid Input Types: {", ".join(i for i in error.converters)}\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+    elif isinstance(error, UnexpectedQuoteError):
+        await ctx.reply(f'Found Unexpected Quote mark inside non-quoted string!\n Quote: `{error.quote}`')
+    elif isinstance(error, InvalidEndOfQuotedStringError):
+        await ctx.reply(f'Expected space after closing quote but `{error.char}` found!')
+    elif isinstance(error, ExpectedClosingQuoteError):
+        await ctx.reply(f'Expected `{error.close_quote}` Closing quote but not Found!')
+    elif isinstance(error, CheckAnyFailure):
+        pass
+    elif isinstance(error, PrivateMessageOnly):
+        await ctx.reply('This command or an Operation in this command works in Private Messages (DMs) only!')
+    elif isinstance(error, NoPrivateMessage):
+        with suppress(Exception):
+            await ctx.author.send('This command or an Operation in this command do not work in Private Messages (DMs)!')
+    elif isinstance(error, NotOwner):
+        await ctx.reply('This is a **Developer Only** Command!')
+    elif isinstance(error, MissingPermissions):
+        await ctx.reply(f'You are Missing Permissions to use this Command!\n> Missing Permissions: `{", ".join(str(i).replace("_", " ").capitalize() for i in error.missing_perms)}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+    elif isinstance(error, BotMissingPermissions):
+        await ctx.reply(f'I am Missing Permissions to execute this Command!\n> Missing Permissions: `{", ".join(str(i).replace("_", " ").capitalize() for i in error.missing_perms)}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+    elif isinstance(error, MissingRole):
+        await ctx.reply(f'You are Missing required Role to use this Command!\n> Missing Role Parameter: `{error.missing_role}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+    elif isinstance(error, BotMissingRole):
+        await ctx.reply(f'I am Missing required Role to execute this Command!\n> Missing Role Parameter: `{error.missing_role}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+    elif isinstance(error, MissingAnyRole):
+        await ctx.reply(f'You are Missing required Role to use this Command! You need to have atleast one role out of the Missing Roles to run this Command.\n> Missing Roles Parameters: `{", ".join(i for i in error.missing_roles)}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+    elif isinstance(error,BotMissingAnyRole):
+        await ctx.reply(f'I am Missing required Role to use this Command! I need to have atleast one role out of the Missing Roles to execute this Command.\n> Missing Roles Parameters: `{", ".join(i for i in error.missing_roles)}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+    elif isinstance(error, NSFWChannelRequired):
+        await ctx.reply('This command can only be used in NSFW channels!')
+    elif isinstance(error, DisabledCommand):
+        await ctx.reply('This command is Disabled!')
+    elif isinstance(error, CommandInvokeError):
+        await ctx.reply(f'Oops! Some error occured while invoking the command!\n> Error: `{error.__cause__}`')
+    elif isinstance(error, CommandOnCooldown):
+        await ctx.reply(f'Woah! Looks like you\'re in hurry! This command is on `{error.cooldown.tpye}` type Cooldown! Try again in `{error.retry_after:,.0f}` seconds.')
+    elif isinstance(error, MaxConcurrencyReached):
+        await ctx.reply(f'Woah! Looks like this command is being used a lot...\nThe command reached it\'s Max Concurrency of `{error.number}` invokers per `{error.per}`. Try again in a few seconds...')
+    elif isinstance(error, ExtensionAlreadyLoaded):
+        await ctx.reply('Extension is Already Loaded!')
+    elif isinstance(error, ExtensionNotLoaded):
+        await ctx.reply('Extension is not Loaded!')
+    elif isinstance(error, NoEntryPointError):
+        await ctx.reply('The Extension do not have a `setup` entry point function.')
+    elif isinstance(error, ExtensionNotFound):
+        await ctx.reply('Unable to find the Extension!')
+    elif isinstance(error, CommandRegistrationError):
+        await ctx.reply(f'Command with name `{error.name}` cannot be addded because it\'s name is already taken by a different Command.\n> Alias Conflict: `{error.alias_conflict}`')
+    else:
+        await ctx.reply(f'Oops! Some error Occured...\n> Error: `{error}`')
+        print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
+        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)

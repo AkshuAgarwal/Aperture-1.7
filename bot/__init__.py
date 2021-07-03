@@ -15,7 +15,7 @@ from discord.ext import commands, tasks
 from discord.ext.commands import Bot as BotBase
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from .main import is_disabled
+from .main import is_disabled, error_handler
 
 load_dotenv('./.env')
 
@@ -163,11 +163,8 @@ class Bot(BotBase):
     async def on_disconnect(self) -> None:
         print("Client Disconnected.")
 
-    async def on_error(self, err: str, *args, **kwargs):
-        if err == "on_command_error":
-            await args[0].reply("Oops! Something went Wrong...")
-
-        traceback.print_exc()
+    async def on_command_error(self, ctx, exc) -> None:
+        await error_handler(ctx, exc)
 
     async def on_ready(self) -> None:
         if self.ready:
@@ -194,7 +191,7 @@ class Bot(BotBase):
             return
         await self.process_commands(after)
 
-    async def on_message_delete(self, message):
+    async def on_message_delete(self, message) -> None:
         if message.author.bot:
             pass
         try:
@@ -212,15 +209,12 @@ class Bot(BotBase):
             return
         await self.invoke(ctx)
 
+    async def on_command_completion(self, ctx):
+        with suppress(Exception):
+            await asyncio.sleep(client.time_limit)
+            client.old_responses.pop(ctx.message.id)
+
 client = Bot()
-
-
-@client.event
-async def on_command_completion(ctx):
-    with suppress(Exception):
-        await asyncio.sleep(client.time_limit)
-        client.old_responses.pop(ctx.message.id)
-
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(create_pool(client, loop))
