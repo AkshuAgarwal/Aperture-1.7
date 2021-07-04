@@ -27,25 +27,10 @@ if sys.version_info[0] == 3 and sys.version_info[1] >= 7 and sys.platform.starts
 load_dotenv('./.env')
 
 logger = logging.getLogger()
-discord_logger = logging.getLogger('discord')
-apscheduler_logger = logging.getLogger('apscheduler')
-
 logger.setLevel(logging.DEBUG)
-discord_logger.setLevel(logging.DEBUG)
-apscheduler_logger.setLevel(logging.DEBUG)
-
-handler = logging.FileHandler('logs/aperture.log', encoding='utf-8', mode='w')
-discord_handler = logging.FileHandler('logs/discord.log', encoding='utf-8', mode='w')
-apscheduler_handler = logging.FileHandler('logs/apscheduler.log', encoding='utf-8', mode='w')
-
+handler = logging.FileHandler('aperture.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-discord_handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-apscheduler_handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-
 logger.addHandler(handler)
-discord_logger.addHandler(discord_handler)
-apscheduler_logger.addHandler(apscheduler_handler)
-
 
 with open("./data/botdata.json", "r", encoding="utf-8") as f:
     botdata = json.load(f)

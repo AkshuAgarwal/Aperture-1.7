@@ -3,7 +3,7 @@ __pycache__
 .vs
 .vscode
 .idea
-logs
+aperture.log
 
 # Some Archived/Junk Files no longer used or used for Testing
 archive
