@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from bot.main import NewCommand
 
-from bot.main import Emoji, Errors, reply
+from bot.main import Emoji, reply
 
 class Load(commands.Cog):
     def __init__(self, client):
@@ -18,7 +18,7 @@ class Load(commands.Cog):
         help="""This command is used to Load the Cogs into the Bot.
 The Cog should be a Python File Only. No other Languages Work.
 The Cog should be in the Proper directory as set by the Developer.""",
-        usage="`load` `<cog_name:str>`",
+        usage="<cog_name:str>",
         explained_usage=["**Cog Name:** The Name of the Python File to be Loaded."],
         permissions=['Developer Only'],
         examples=[
@@ -39,12 +39,6 @@ The Cog should be in the Proper directory as set by the Developer.""",
         if _found is False:
             return await reply(self.client, ctx, f"{Emoji.redcross} No file named `{cog_name}` Found")
 
-                
-    @_load.error
-    async def _load_error(self, ctx, error):
-        _error = getattr(error, "original", error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(Load(client))

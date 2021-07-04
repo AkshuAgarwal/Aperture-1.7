@@ -3,7 +3,7 @@ from datetime import datetime
 from discord import Embed
 from discord.ext import commands
 
-from bot.main import NewCommand, reply, Errors
+from bot.main import NewCommand, reply
 
 class CurrenccyInfo(commands.Cog):
     def __init__(self, client):
@@ -13,11 +13,9 @@ class CurrenccyInfo(commands.Cog):
         name='currencyinfo',
         cls=NewCommand,
         aliases=['aperturesinfo'],
-        usage='`currencyinfo`',
         brief='Btw, what are Apertures?',
         description="Get info about Bot's Currency - Apertures",
         help="""This command is used to get all the info about the Bot's Currency, also known as Apertures!""",
-        cooldown='`1/10` - [`User`]',
         examples=[
             'currencyinfo'
         ]
@@ -45,11 +43,6 @@ So what are you waiting for? Create an Account by using `{ctx.prefix}createaccou
 
         await reply(self.client, ctx, embed=embed)
 
-    @_currencyinfo.error
-    async def _currencyinfo_error(self, ctx, error):
-        _error = getattr(error, 'original', error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(CurrenccyInfo(client))

@@ -165,9 +165,7 @@ In this Game, 2 players take turns marking the spaces in a 3×3 grid with the Sy
 The player who succeeds in placing three of their marks in a diagonal, horizontal, or vertical row is the winner.
 Both players need to have minimum 50 Apertures to Play the Game. The Winner will get a total of 100 Apertures Back while the other player will lose 50. No Win/lose on Tie!
 Need more info on Apertures? Use `currencyinfo` Comand!""",
-        usage="`tictactoe`",
         bot_permissions=['Manage Messages'],
-        cooldown="`1/15 sec` - [`User`]",
         examples=[
             'tictactoe'
         ]

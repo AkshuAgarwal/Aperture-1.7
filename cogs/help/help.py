@@ -64,9 +64,9 @@ class Help(commands.Cog):
             embed.set_footer(text=f"Thanks for using {ctx.guild.me.name}", icon_url=ctx.guild.me.avatar_url)
 
             if not command.usage:
-                _cmd_syntax = "None"
+                _cmd_syntax = f"`{ctx.prefix}{command.name}`"
             else:
-                _cmd_syntax = f"`{ctx.prefix}` {command.usage}"
+                _cmd_syntax = f"`{ctx.prefix}{command.name} {command.usage}`"
             if not command.aliases:
                 _cmd_aliases = "None"
             else:
@@ -83,6 +83,11 @@ class Help(commands.Cog):
                 _cmd_bot_permissions = "None"
             else:
                 _cmd_bot_permissions = "→ " + "\n→ ".join([i for i in command.bot_permissions])
+            if not command._buckets._cooldown:
+                _cmd_cooldown = "None"
+            else:
+                _bucket = command._buckets._cooldown
+                _cmd_cooldown = f"`{_bucket.rate}/{int(_bucket.per)} [{(str(_bucket.type)[11:]).capitalize()}]`"
             if not command.examples:
                 _cmd_examples = "None"
             else:
@@ -101,7 +106,7 @@ class Help(commands.Cog):
             embed.add_field(name=f"{Emoji.cmd_bot_permissions} | Permissions Required by Bot",
                 value=_cmd_bot_permissions, inline=False)
             embed.add_field(name=f"{Emoji.cmd_cooldown} | Cooldown",
-                value=command.cooldown if command.cooldown is not None else "None", inline=False)
+                value=_cmd_cooldown, inline=False)
             embed.add_field(name=f"{Emoji.cmd_examples} | Examples",
                 value=_cmd_examples, inline=False)
 
@@ -115,13 +120,12 @@ class Help(commands.Cog):
         cls= NewCommand,
         brief='Get some Help',
         description="To get Help for my Commands",
-        usage="`help` `[command_name:str]` `[--all]`",
+        usage="[command_name:str] [--all]",
         explained_usage=[
             "**Command Name:** Name of the particular Command to get help for.",
             "**--all:** Adding `--all` after help will send you a full Command list in your DMs. Make sure you have your DMs on."
         ],
         bot_permissions=['Manage Messages'],
-        cooldown='`1/5 sec` - [`User`]',
         examples=[
             'help',
             'help --all',

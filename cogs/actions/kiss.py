@@ -5,7 +5,7 @@ from datetime import datetime
 from discord import User, Member, Embed
 from discord.ext import commands
 
-from bot.main import NewCommand, reply, Errors
+from bot.main import NewCommand, reply
 
 class Kiss(commands.Cog):
     def __init__(self, client):
@@ -39,9 +39,8 @@ class Kiss(commands.Cog):
         cls=NewCommand,
         brief='Kiss Me!',
         description='Kiss someone with a Cute Gif!',
-        usage='`kiss` `<user:name/id/@mention>`',
+        usage='<user:name/id/@mention>',
         explained_usage=["**User:** The User whom you wanna give a Kiss!"],
-        cooldown='`1/5 sec` - [`Member`]',
         examples=[
             'kiss @Akshu',
             'kiss 764462046032560128',
@@ -57,12 +56,6 @@ class Kiss(commands.Cog):
         embed.set_footer(text=f'Thanks for using {ctx.guild.me.name}', icon_url=ctx.guild.me.avatar_url)
         embed.set_image(url=gif)
         await reply(self.client, ctx, embed=embed)
-
-    @_kiss.error
-    async def _kiss_error(self, ctx, error):
-        _error = getattr(error, 'original', error)
-        error = Errors(ctx, error)
-        await error.response()
 
 def setup(client):
     client.add_cog(Kiss(client))

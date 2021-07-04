@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, Errors, reply
+from bot.main import NewCommand, Emoji, reply
 
 class ChannelManagement(commands.Cog):
     def __init__(self, client):
@@ -14,10 +14,9 @@ class ChannelManagement(commands.Cog):
         description="Disables the Bot to be operated in a Particular Channel",
         help="""This command is used to Disable the Bot to be operated/used in a Particular Channel in the Server.
 All the Commands of the Bot cannot be used in that Channel but still be operatable in other Enabled Channels.""",
-        usage="`disablechannel` `<channel:(id/mention)>`",
+        usage="<channel:(id/mention)>",
         explained_usage=["**Channel:** The Channel in which you want the Bot to be Disabled."],
         permissions=["Administrator"],
-        cooldown="`1/10 sec` - [`Guild`]",
         examples=[
             'disablechannel #general',
             'disablechannel 844974705376881268'
@@ -54,11 +53,6 @@ All the Commands of the Bot cannot be used in that Channel but still be operatab
 
         return await reply(self.client, ctx, resp)
 
-    @_disablechannel.error
-    async def _disablechannel_error(self, ctx, error):
-        _error = getattr(error, "original", error)
-        error = Errors(ctx, _error)
-        await error.response()
 
     @commands.command(
         name="enablechannel",
@@ -67,10 +61,9 @@ All the Commands of the Bot cannot be used in that Channel but still be operatab
         description="Enables the Bot to be operated in a Particular Channel",
         help="""This command is used to Enable the Bot to be operated/used in a Particular Channel in the Server.
 Only works if the Bot was already Disabled in that Channel.""",
-        usage="`enablechannel` `<channel:(id/mention)>`",
+        usage="<channel:(id/mention)>",
         explained_usage=["**Channel:** The Channel in which you want the Bot to be Disabled."],
         permissions=["Administrator"],
-        cooldown="`1/10 sec` - [`Guild`]",
         examples=[
             'enablechannel #general',
             'enablechannel 844974705376881268'
@@ -102,11 +95,6 @@ Only works if the Bot was already Disabled in that Channel.""",
 
         return await reply(self.client, ctx, resp)
 
-    @_enablechannel.error
-    async def _enablechannel_error(self, ctx, error):
-        _error = getattr(error, "original", error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(ChannelManagement(client))

@@ -14,9 +14,9 @@ async def error_handler(ctx: Context, error):
     if isinstance(error, ignored):
         return
     elif isinstance(error, MissingRequiredArgument):
-        await ctx.reply(f'Missing Required Argument!\nMissing Arguments: `{error.param}`\n> Usage: `{ctx.prefix}{ctx.invoked_with} {ctx.command.usage}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+        await ctx.reply(f'Missing Required Argument!\n> Missing Arguments: `{error.param}`\n> Usage: `{ctx.prefix}{ctx.invoked_with} {ctx.command.usage}`\n\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
     elif isinstance(error, TooManyArguments):
-        await ctx.reply(f'Too Many Arguments!\n> Usage: `{ctx.prefix}{ctx.invoked_with} {ctx.command.usage}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+        await ctx.reply(f'Too Many Arguments!\n> Usage: `{ctx.prefix}{ctx.invoked_with} {ctx.command.usage}`\n\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
     elif isinstance(error, MessageNotFound):
         await ctx.reply(f'Unable to find Message!\n> Argument passed: `{error.argument}`')
     elif isinstance(error, MemberNotFound):
@@ -40,7 +40,7 @@ async def error_handler(ctx: Context, error):
     elif isinstance(error, BadBoolArgument):
         await ctx.reply(f'Boolean Argument does not match the valid format!\n> Arguments passed: `{error.argument}`')
     elif isinstance(error, BadUnionArgument):
-        await ctx.reply(f'Invaild Inupt type passed in Arguments!\n> Parameter failed: {error.param}\n> Valid Input Types: {", ".join(i for i in error.converters)}\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+        await ctx.reply(f'Invaild Inupt type passed in Arguments!\n> Parameter failed: {error.param}\n> Valid Input Types: {", ".join(i for i in error.converters)}\n\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
     elif isinstance(error, UnexpectedQuoteError):
         await ctx.reply(f'Found Unexpected Quote mark inside non-quoted string!\n Quote: `{error.quote}`')
     elif isinstance(error, InvalidEndOfQuotedStringError):
@@ -57,17 +57,17 @@ async def error_handler(ctx: Context, error):
     elif isinstance(error, NotOwner):
         await ctx.reply('This is a **Developer Only** Command!')
     elif isinstance(error, MissingPermissions):
-        await ctx.reply(f'You are Missing Permissions to use this Command!\n> Missing Permissions: `{", ".join(str(i).replace("_", " ").capitalize() for i in error.missing_perms)}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+        await ctx.reply(f'You are Missing Permissions to use this Command!\n> Missing Permissions: `{", ".join(str(i).replace("_", " ").capitalize() for i in error.missing_perms)}`\n\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
     elif isinstance(error, BotMissingPermissions):
-        await ctx.reply(f'I am Missing Permissions to execute this Command!\n> Missing Permissions: `{", ".join(str(i).replace("_", " ").capitalize() for i in error.missing_perms)}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+        await ctx.reply(f'I am Missing Permissions to execute this Command!\n> Missing Permissions: `{", ".join(str(i).replace("_", " ").capitalize() for i in error.missing_perms)}`\n\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
     elif isinstance(error, MissingRole):
-        await ctx.reply(f'You are Missing required Role to use this Command!\n> Missing Role Parameter: `{error.missing_role}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+        await ctx.reply(f'You are Missing required Role to use this Command!\n> Missing Role Parameter: `{error.missing_role}`\n\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
     elif isinstance(error, BotMissingRole):
-        await ctx.reply(f'I am Missing required Role to execute this Command!\n> Missing Role Parameter: `{error.missing_role}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+        await ctx.reply(f'I am Missing required Role to execute this Command!\n> Missing Role Parameter: `{error.missing_role}`\n\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
     elif isinstance(error, MissingAnyRole):
-        await ctx.reply(f'You are Missing required Role to use this Command! You need to have atleast one role out of the Missing Roles to run this Command.\n> Missing Roles Parameters: `{", ".join(i for i in error.missing_roles)}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+        await ctx.reply(f'You are Missing required Role to use this Command! You need to have atleast one role out of the Missing Roles to run this Command.\n> Missing Roles Parameters: `{", ".join(i for i in error.missing_roles)}`\n\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
     elif isinstance(error,BotMissingAnyRole):
-        await ctx.reply(f'I am Missing required Role to use this Command! I need to have atleast one role out of the Missing Roles to execute this Command.\n> Missing Roles Parameters: `{", ".join(i for i in error.missing_roles)}`\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
+        await ctx.reply(f'I am Missing required Role to use this Command! I need to have atleast one role out of the Missing Roles to execute this Command.\n> Missing Roles Parameters: `{", ".join(i for i in error.missing_roles)}`\n\nNeed more info? Use `{ctx.prefix}help {ctx.invoked_with}`')
     elif isinstance(error, NSFWChannelRequired):
         await ctx.reply('This command can only be used in NSFW channels!')
     elif isinstance(error, DisabledCommand):
@@ -75,7 +75,7 @@ async def error_handler(ctx: Context, error):
     elif isinstance(error, CommandInvokeError):
         await ctx.reply(f'Oops! Some error occured while invoking the command!\n> Error: `{error.__cause__}`')
     elif isinstance(error, CommandOnCooldown):
-        await ctx.reply(f'Woah! Looks like you\'re in hurry! This command is on `{error.cooldown.tpye}` type Cooldown! Try again in `{error.retry_after:,.0f}` seconds.')
+        await ctx.reply(f'Woah! Looks like you\'re in hurry! This command is on `{(str(error.cooldown.type)[11:]).capitalize()}` type Cooldown! Try again in `{error.retry_after:,.0f}` seconds.')
     elif isinstance(error, MaxConcurrencyReached):
         await ctx.reply(f'Woah! Looks like this command is being used a lot...\nThe command reached it\'s Max Concurrency of `{error.number}` invokers per `{error.per}`. Try again in a few seconds...')
     elif isinstance(error, ExtensionAlreadyLoaded):

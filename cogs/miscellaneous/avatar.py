@@ -4,7 +4,7 @@ from typing import Union
 from discord import Member, User, Embed
 from discord.ext import commands
 
-from bot.main import NewCommand, Errors, reply
+from bot.main import NewCommand, reply
 
 class Avatar(commands.Cog):
     def __init__(self, client):
@@ -18,9 +18,8 @@ class Avatar(commands.Cog):
         description='Get the Avatar of a User',
         help="""This command is used to get the Avatar of a User/Member.
 The Member should be visible to Me. That means I need to share atleast 1 common Server with the user of whom I need to get the Avatar.""",
-        usage='`avatar` `[user:name/id/@mention, default:command_invoker]`',
+        usage='[user:name/id/@mention, default:command_invoker]',
         explained_usage=["**User:** User whose Avatar you need to get. Can be Name, ID or Mention."],
-        cooldown='`1/5 sec` - [`Member`]',
         examples=[
             'avatar',
             'avatar 764462046032560128',
@@ -45,12 +44,6 @@ The Member should be visible to Me. That means I need to share atleast 1 common 
         embed.set_image(url=user.avatar_url)
         
         await reply(self.client, ctx, embed=embed)
-
-    @_avatar.error
-    async def _avatar_error(self, ctx, error):
-        _error = getattr(error, 'original', error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(Avatar(client))

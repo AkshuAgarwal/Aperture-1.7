@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from bot.main import NewCommand
 
-from bot.main import Emoji, Errors, reply
+from bot.main import Emoji, reply
 
 class Unload(commands.Cog):
     def __init__(self, client):
@@ -19,7 +19,7 @@ class Unload(commands.Cog):
 The Cog should be Pre-Loaded into the Bot.
 The Cog should be a Python File Only. No other Languages Work.
 The Cog should be in the Proper directory as set by the Developer.""",
-        usage="`unload` `<cog_name:str>`",
+        usage="<cog_name:str>",
         explained_usage=["**Cog Name:** The Name of the Python File to be Unloaded."],
         permissions=['Developer Only'],
         examples=[
@@ -40,11 +40,6 @@ The Cog should be in the Proper directory as set by the Developer.""",
         if _found is False:
             return await reply(self.client, ctx, f"{Emoji.redcross} No file named `{cog_name}` Found")
 
-    @_unload.error
-    async def _unload_error(self, ctx, error):
-        _error = getattr(error, "original", error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(Unload(client))

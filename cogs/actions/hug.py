@@ -5,7 +5,7 @@ from datetime import datetime
 from discord import User, Member, Embed
 from discord.ext import commands
 
-from bot.main import NewCommand, reply, Errors
+from bot.main import NewCommand, reply
 
 class Hug(commands.Cog):
     def __init__(self, client):
@@ -40,15 +40,16 @@ class Hug(commands.Cog):
         cls=NewCommand,
         brief='A Hug for you!',
         description='Give someone a Tight Hug!',
-        usage='`hug` `<user:name/id/@mention>`',
+        usage='<user:name/id/@mention>',
         explained_usage=["**User:** The User whom you wanna give a Hug!"],
-        cooldown='`1/5 sec` - [`Member`]',
         examples=[
             'hug @Akshu',
             'hug 764462046032560128',
             'hug Akshu#7472'
         ]
     )
+    @commands.guild_only()
+    @commands.bot_has_permissions(send_messages=True, embed_links=True)
     @commands.cooldown(1, 5, commands.BucketType.member)
     async def _hug(self, ctx, user:Union[User, Member]):
         gif, msg = self.randomise([ctx.author.name, user.name])
@@ -58,12 +59,6 @@ class Hug(commands.Cog):
         embed.set_footer(text=f'Thanks for using {ctx.guild.me.name}', icon_url=ctx.guild.me.avatar_url)
         embed.set_image(url=gif)
         await reply(self.client, ctx, embed=embed)
-
-    @_hug.error
-    async def _hug_error(self, ctx, error):
-        _error = getattr(error, 'original', error)
-        error = Errors(ctx, error)
-        await error.response()
 
 def setup(client):
     client.add_cog(Hug(client))

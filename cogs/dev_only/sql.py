@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands
 from tabulate import tabulate
 
-from bot.main import NewCommand, StringPaginator, Errors, Emoji, reply
+from bot.main import NewCommand, StringPaginator, Emoji, reply
 
 class SQL(commands.Cog):
     def __init__(self, client):
@@ -35,7 +35,7 @@ class SQL(commands.Cog):
         description="To Execute SQL Statement in the Bot's Database",
         help="""This command can execute a SQL statement (PostreSQL) into the Bot to get Bot Data and do several Operations for Bot and Data Management.
 This is a **Developer Only** Command. Means, only the Bot owner can use this Command.""",
-        usage="`sql` `<query_type:str(fetch/execute)>` `<query:str>`",
+        usage="<query_type:str('fetch'/'execute')> <query:str>",
         explained_usage=["**Query Type:** Type of Query to Execute (`fetch`/`execute`)", "**Query:** The SQL Query to execute. Code blocks are also Accepted."],
         permissions=['Developer Only'],
         bot_permissions=['Manage Messages'],
@@ -76,11 +76,6 @@ This is a **Developer Only** Command. Means, only the Bot owner can use this Com
                 else:
                     return await reply(self.client, ctx, f"{Emoji.redcross} Invalid Query Type! Valid Types: `fetch`/`execute`")
 
-    @_sql.error
-    async def _sql_error(self, ctx, error):
-        _error = getattr(error, 'original', error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(SQL(client))

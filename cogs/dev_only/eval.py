@@ -7,7 +7,7 @@ import datetime
 import discord
 from discord.ext import commands
 
-from bot.main import NewCommand, Paginator, Errors
+from bot.main import NewCommand, Paginator
 
 class Eval(commands.Cog):
     def __init__(self, client):
@@ -43,7 +43,7 @@ class Eval(commands.Cog):
         description="To Execute Python Code in the Bot",
         help="""This command can execute a Python Script into the Bot to get Bot Data and do several Operations for Bot and Data Management.
 This is a **Developer Only** Command. Means, only the Bot owner can use this Command.""",
-        usage="`eval` `<code:str>`",
+        usage="<code:str>",
         explained_usage=["**Code:** The Python Code to execute. Code blocks are also Accepted."],
         permissions=['Developer Only'],
         bot_permissions=['Manage Messages'],
@@ -87,11 +87,6 @@ This is a **Developer Only** Command. Means, only the Bot owner can use this Com
         )
         await pager.start(ctx)
 
-    @_eval.error
-    async def _eval_error(self, ctx, error):
-        _error = getattr(error, 'original', error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(Eval(client))

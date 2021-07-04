@@ -2,7 +2,7 @@ from typing import Optional
 
 from discord.ext import commands
 
-from bot.main import NewCommand, Errors, Emoji, reply
+from bot.main import NewCommand, Emoji, reply
 
 class SetPrefix(commands.Cog):
     def __init__(self, client):
@@ -17,10 +17,9 @@ class SetPrefix(commands.Cog):
 Maximum Length of the Prefix can be `5`.
 The Prefix cannot contain Spaces.
 You can also choose whether you want the Prefix to be Case Insensitive, i.e., if the Prefix is `ap!` and case_insensitive is True, then Bot will also respond to `Ap!`/`aP!`/`AP!`.""",
-        usage="`setprefix` `<prefix:str>` `[case_insensitive:bool(true/t/false/f), default:true]`",
+        usage="<prefix:str> [case_insensitive:bool(true/t/false/f), default:true]",
         explained_usage=["**Prefix:** Prefix for the Bot to be set.", "**Case Insensitive:** Whether to Accept prefix regardless of it's Case (True/False) [Optional, default:True]"],
         permissions=["Administrator"],
-        cooldown="`1/60 sec` - [`Guild`]",
         examples=[
             'setprefix ap!',
             'setprefix ! false',
@@ -47,11 +46,6 @@ You can also choose whether you want the Prefix to be Case Insensitive, i.e., if
                 self.client.prefixes[ctx.guild.id] = [prefix, case]
                 return await reply(self.client, ctx, f"{Emoji.greentick} Successfully Changed prefix for this Server to `{prefix}`!")
 
-    @_setprefix.error
-    async def _setprefix_error(self, ctx, error):
-        _error = getattr(error, "original", error)
-        error = Errors(ctx, error)
-        await error.response()
 
 def setup(client):
     client.add_cog(SetPrefix(client))

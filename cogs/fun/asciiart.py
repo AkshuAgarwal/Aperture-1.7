@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from bot.main import NewCommand, Errors, Emoji, reply
+from bot.main import NewCommand, Emoji, reply
 
 from art import text2art
 
@@ -17,8 +17,7 @@ class ASCIIArt(commands.Cog):
         help="""This command is used to convert the Text to ASCII Art.
 Max Length of Text can be x Letters.""",
         explained_usage=["**Text:** The Text to Convert to ASCII Art."],
-        usage="`ascii` `<text:str>`",
-        cooldown="`2/10 sec` - [`Member`]",
+        usage="<text:str>",
         examples=[
             "ascii Hello, how are you?",
             "asciiart Hey, I'm Aperture!"
@@ -36,11 +35,6 @@ Max Length of Text can be x Letters.""",
 
         await reply(self.client, ctx, f"```\n{art}```")
 
-    @_asciiart.error
-    async def _asciiart_error(self, ctx, error):
-        _error = getattr(error, "original", error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(ASCIIArt(client))

@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from bot.main import NewCommand, reply, Emoji, Errors
+from bot.main import NewCommand, reply, Emoji
 
 class CreateAccount(commands.Cog):
     def __init__(self, client):
@@ -11,11 +11,9 @@ class CreateAccount(commands.Cog):
         cls=NewCommand,
         brief="Wanna Open a New Account?",
         description="Create an Apertures Currency Account!",
-        usage="`createaccount`",
         help="""This command is used to Create an Account for the Apertures Currency!
 The Bot has many Games and Features which requires you to have an Apertures Currency Account Registered in the Bot.
 You can enjoy Bot Games, earn Apertures by Playing Games and many more!!!""",
-        cooldown="`1/300` - [`User`]",
         examples=[
             'createaccount'
         ]
@@ -31,11 +29,6 @@ You can enjoy Bot Games, earn Apertures by Playing Games and many more!!!""",
                 else:
                     return await reply(self.client, ctx, f"{Emoji.redcross} You already have an Account Registered!\n\n> **Tip:** To check your current Account Balance, use `{ctx.prefix}balance`!")
 
-    @_createaccount.error
-    async def _createaccount_error(self, ctx, error):
-        _error = getattr(error, 'original', error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(CreateAccount(client))

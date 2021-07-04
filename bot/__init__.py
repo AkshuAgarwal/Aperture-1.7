@@ -1,9 +1,12 @@
-from datetime import datetime
 import os
+import sys
 import json
-import traceback
 import asyncio
+import aiohttp
+import traceback
 import itertools
+from datetime import datetime
+from typing import Optional
 from pytz import utc
 from contextlib import suppress
 from dotenv import load_dotenv
@@ -16,6 +19,9 @@ from discord.ext.commands import Bot as BotBase
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from .main import is_disabled, error_handler
+
+if sys.version_info[0] == 3 and sys.version_info[1] >= 7 and sys.platform.startswith('win'):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 load_dotenv('./.env')
 
@@ -74,15 +80,16 @@ class Bot(BotBase):
             case_insensitive=True
         )
 
-        self.ready = False
+        self.ready:bool = False
         self.scheduler = AsyncIOScheduler()
         self.scheduler.configure(timezone=utc)
 
-        self.old_responses = {}
-        self.prefixes = {}
-        self.disabled_data = {}
-        self.time_limit = 120
+        self.old_responses:dict = {}
+        self.prefixes:dict = {}
+        self.disabled_data:dict = {}
+        self.time_limit:int = 120
         self.launch_time = datetime.utcnow()
+        self.aiohttp_session: Optional[aiohttp.ClientSession] = None
 
         self.COGS = list()
         for folders in os.scandir("./cogs"):
@@ -137,6 +144,7 @@ class Bot(BotBase):
 
     async def startup(self):
         await self.wait_until_ready()
+        self.aiohttp_session = aiohttp.ClientSession()
         await self.setup_db()
         await self.cache_db()
         self.update_presence.start()
@@ -155,6 +163,7 @@ class Bot(BotBase):
     async def close(self) -> None:
         print("Shutting Down...")
         self.scheduler.shutdown()
+        await self.aiohttp_session.close()
         await super().close()
 
     async def on_connect(self) -> None:

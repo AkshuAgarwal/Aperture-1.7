@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, StringPaginator, Errors, reply
+from bot.main import NewCommand, Emoji, StringPaginator, reply
 
 class Morse(commands.Cog):
     def __init__(self, client):
@@ -13,8 +13,7 @@ class Morse(commands.Cog):
         description="Convert the Morse Code to Text and Text to Morse Code",
         help="""This command is used to convert the Morse Code into Ascii Text and Text to Morse Code.""",
         explained_usage=["**String:** The Text or Morse to Convert."],
-        usage="`morse` `<string:str>`",
-        cooldown="`1/5 sec` - [`User`]",
+        usage="<string:str>",
         examples=[
             'morse Hello, how are you!',
             'morse -- --- .-. ... . ....... . -..- .- -- .--. .-.. .'
@@ -68,11 +67,6 @@ class Morse(commands.Cog):
             except KeyError as e:
                 return await reply(self.client, ctx, f"{Emoji.redcross} The String contains some characters which cannot be converted into Morse!\n> If you think that's a Mistake, please report it to my Developers, they'll Review and fix it :)")
 
-    @_morse.error
-    async def _morse_error(self, ctx, error):
-        _error = getattr(error, "original", error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(Morse(client))

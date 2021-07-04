@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, Errors, reply
+from bot.main import NewCommand, Emoji, reply
 
 class CommandManagement(commands.Cog):
     def __init__(self, client):
@@ -18,10 +18,9 @@ class CommandManagement(commands.Cog):
         help="""This command is used to Disable any command of the Bot in the Server.
 Some commands like Help, Developer and Configure Commands cannot be Disabled.
 You can also use Command Alias instead of it's Name to Disable it.""",
-        usage="`disablecommand` `<command_name:str>`",
+        usage="<command_name:str>",
         explained_usage=["**Command Name:** Name of the Command to be Disabled."],
         permissions=["Administrator"],
-        cooldown="`1/10 sec` - [`Guild`]",
         examples=[
             'disablecommand ping',
             'disablecommand tictactoe'
@@ -64,11 +63,6 @@ You can also use Command Alias instead of it's Name to Disable it.""",
 
         return await reply(self.client, ctx, resp)
 
-    @_disablecommand.error
-    async def _disablecommand_error(self, ctx, error):
-        _error = getattr(error, 'original', error)
-        error = Errors(ctx, _error)
-        await error.response()
 
     @commands.command(
         name="enablecommand",
@@ -79,10 +73,9 @@ You can also use Command Alias instead of it's Name to Disable it.""",
 The Command should already be Disabled to Enable it Back.
 Some commands like Help, Developer and Configure Commands are always Enabled.
 You can also use Command Alias instead of it's Name to Enable it.""",
-        usage="`enablecommand` `<command_name:str>`",
+        usage="<command_name:str>",
         explained_usage=["**Command Name:** Name of the Command to be Disabled."],
         permissions=["Administrator"],
-        cooldown="`1/10 sec` - [`Guild`]",
         examples=[
             'enablecommand ping',
             'enablecommand tictactoe'
@@ -120,11 +113,6 @@ You can also use Command Alias instead of it's Name to Enable it.""",
 
         return await reply(self.client, ctx, resp)
 
-    @_enablecommand.error
-    async def _enablecommand_error(self, ctx, error):
-        _error = getattr(error, 'original', error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(CommandManagement(client))

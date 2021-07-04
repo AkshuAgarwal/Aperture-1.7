@@ -4,7 +4,7 @@ from datetime import datetime
 from discord import User, Member, Embed
 from discord.ext import commands
 
-from bot.main import NewCommand, reply, Errors, Emoji
+from bot.main import NewCommand, reply, Emoji
 
 class Balance(commands.Cog):
     def __init__(self, client):
@@ -19,9 +19,8 @@ class Balance(commands.Cog):
         help="""This command is used to check your/any other user's Apertures Account current Balance.
 You should have an Apertures Account Created to use this command.
 Use `createaccount` to Create an Account or use `currencyinfo` to know more!""",
-        usage='`balance` `[user:name/id/@mention, default:command_invoker]`',
+        usage='[user:name/id/@mention, default:command_invoker]',
         explained_usage=["**User:** User whose Balance you need to know. Can be Name, ID or Mention."],
-        cooldown='`1/5 sec` - [`User`]',
         examples=[
             'balance',
             'balance @Akshu',
@@ -54,11 +53,6 @@ Use `createaccount` to Create an Account or use `currencyinfo` to know more!""",
 
                 await reply(self.client, ctx, embed=embed)
 
-    @_balance.error
-    async def _balance_error(self, ctx, error):
-        _error = getattr(error, 'original', error)
-        error = Errors(ctx, _error)
-        await error.response()
 
 def setup(client):
     client.add_cog(Balance(client))
