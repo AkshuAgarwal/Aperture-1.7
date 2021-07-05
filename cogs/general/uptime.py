@@ -2,7 +2,7 @@ from datetime import datetime
 
 from discord.ext import commands
 
-from bot.main import NewCommand, reply
+from bot.main import NewCommand
 
 class Uptime(commands.Cog):
     def __init__(self, client):
@@ -19,13 +19,13 @@ class Uptime(commands.Cog):
         ]
     )
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def _uptime(self, ctx: commands.Context):
+    async def _uptime(self, ctx):
         delta_uptime = datetime.utcnow() - self.client.launch_time
         hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
         minutes, seconds = divmod(remainder, 60)
         days, hours = divmod(hours, 24)
 
-        return await reply(self.client, ctx, f"I've been Up since {days} Days, {hours} Hours, {minutes} Minutes, and {seconds} Seconds!")
+        return await ctx.reply(f"I've been Up since {days} Days, {hours} Hours, {minutes} Minutes, and {seconds} Seconds!")
 
 
 def setup(client):

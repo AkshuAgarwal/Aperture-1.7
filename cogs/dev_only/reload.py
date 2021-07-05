@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from bot.main import NewCommand
 
-from bot.main import Emoji, reply
+from bot.main import Emoji
 
 class Reload(commands.Cog):
     def __init__(self, client):
@@ -35,10 +35,10 @@ The Cog should be in the Proper directory as set by the Developer.""",
                 if files.endswith('.py') and files[:-3] == cog_name:
                     self.client.reload_extension(f"cogs.{folders.name}.{files[:-3]}")
                     _found = True
-                    return await reply(self.client, ctx, f"{Emoji.greentick} Successfully Reoaded `{cog_name}.py`")
+                    return await ctx.reply(f"{Emoji.greentick} Successfully Reoaded `{cog_name}.py`")
         
         if _found is False:
-            return await reply(self.client, ctx, f"{Emoji.redcross} No file named `{cog_name}` Found")
+            return await ctx.reply(f"{Emoji.redcross} No file named `{cog_name}` Found")
 
 
 def setup(client):

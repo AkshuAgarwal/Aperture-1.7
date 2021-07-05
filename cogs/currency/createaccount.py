@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from bot.main import NewCommand, reply, Emoji
+from bot.main import NewCommand, Emoji
 
 class CreateAccount(commands.Cog):
     def __init__(self, client):
@@ -25,9 +25,9 @@ You can enjoy Bot Games, earn Apertures by Playing Games and many more!!!""",
                 data = await conn.fetchrow('SELECT * FROM apertures_currency WHERE user_id=$1;', ctx.author.id)
                 if not data:
                     await conn.execute('INSERT INTO apertures_currency (user_id, balance) VALUES ($1, 500);', ctx.author.id)
-                    return await reply(self.client, ctx, f"{Emoji.greentick} Your Account has been Successfully Created with ID: `{ctx.author.id}`!\nYou can now enjoy playing different Games and earn Apertures too.")
+                    return await ctx.reply(f"{Emoji.greentick} Your Account has been Successfully Created with ID: `{ctx.author.id}`!\nYou can now enjoy playing different Games and earn Apertures too.")
                 else:
-                    return await reply(self.client, ctx, f"{Emoji.redcross} You already have an Account Registered!\n\n> **Tip:** To check your current Account Balance, use `{ctx.prefix}balance`!")
+                    return await ctx.reply(f"{Emoji.redcross} You already have an Account Registered!\n\n> **Tip:** To check your current Account Balance, use `{ctx.prefix}balance`!")
 
 
 def setup(client):

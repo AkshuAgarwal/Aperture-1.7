@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, StringPaginator, reply
+from bot.main import NewCommand, Emoji, StringPaginator
 
 class Morse(commands.Cog):
     def __init__(self, client):
@@ -48,7 +48,7 @@ class Morse(commands.Cog):
         if check is True:
             _templist = str(string).split(' ')
             converted = "".join(MORSE_TO_TEXT[str(i)] for i in _templist)
-            await reply(self.client, ctx, f"`{converted}`")
+            await ctx.reply(f"`{converted}`")
         else:
             _templist = []
             for char in str(string):
@@ -56,7 +56,7 @@ class Morse(commands.Cog):
             try:
                 converted = " ".join(TEXT_TO_MORSE[str(i).upper()] for i in _templist)
                 if len(converted) <= 1998:
-                    await reply(self.client, ctx, f"`{converted}`")
+                    await ctx.reply(f"`{converted}`")
                 else:
                     entries = [f"`{converted[i:i+1998]}`" for i in range(0, len(converted), 1998)]
                     pager = StringPaginator(
@@ -65,7 +65,7 @@ class Morse(commands.Cog):
                     )
                     await pager.start(ctx)
             except KeyError as e:
-                return await reply(self.client, ctx, f"{Emoji.redcross} The String contains some characters which cannot be converted into Morse!\n> If you think that's a Mistake, please report it to my Developers, they'll Review and fix it :)")
+                return await ctx.reply(f"{Emoji.redcross} The String contains some characters which cannot be converted into Morse!\n> If you think that's a Mistake, please report it to my Developers, they'll Review and fix it :)")
 
 
 def setup(client):

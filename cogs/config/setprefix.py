@@ -2,7 +2,7 @@ from typing import Optional
 
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, reply
+from bot.main import NewCommand, Emoji
 
 class SetPrefix(commands.Cog):
     def __init__(self, client):
@@ -38,13 +38,13 @@ You can also choose whether you want the Prefix to be Case Insensitive, i.e., if
         elif case_insensitive.lower() in ["false", "f"]:
             case = False
         else:
-            return await reply(self.client, ctx, f"{Emoji.redcross} `{case_insensitive}` is not a Valid Boolean Type Accepted by the Bot...\nChoose from `True/t` or `False/f`")
+            return await ctx.reply(f"{Emoji.redcross} `{case_insensitive}` is not a Valid Boolean Type Accepted by the Bot...\nChoose from `True/t` or `False/f`")
 
         async with self.client.pool.acquire() as conn:
             async with conn.transaction() as trans:
                 await conn.execute("UPDATE guild_data SET prefix=$1, prefix_case_insensitive=$2 WHERE guild_id=$3;", prefix, case, ctx.guild.id)
                 self.client.prefixes[ctx.guild.id] = [prefix, case]
-                return await reply(self.client, ctx, f"{Emoji.greentick} Successfully Changed prefix for this Server to `{prefix}`!")
+                return await ctx.reply(f"{Emoji.greentick} Successfully Changed prefix for this Server to `{prefix}`!")
 
 
 def setup(client):

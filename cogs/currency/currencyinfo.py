@@ -3,7 +3,7 @@ from datetime import datetime
 from discord import Embed
 from discord.ext import commands
 
-from bot.main import NewCommand, reply
+from bot.main import NewCommand
 
 class CurrenccyInfo(commands.Cog):
     def __init__(self, client):
@@ -41,7 +41,7 @@ So what are you waiting for? Create an Account by using `{ctx.prefix}createaccou
         embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
         embed.set_footer(text=f'Thanks for using {ctx.guild.me.name}', icon_url=ctx.guild.me.avatar_url)
 
-        await reply(self.client, ctx, embed=embed)
+        await ctx.reply(embed=embed)
 
 
 def setup(client):

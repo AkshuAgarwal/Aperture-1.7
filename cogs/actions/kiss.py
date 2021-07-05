@@ -5,7 +5,7 @@ from datetime import datetime
 from discord import User, Member, Embed
 from discord.ext import commands
 
-from bot.main import NewCommand, reply
+from bot.main import NewCommand
 
 class Kiss(commands.Cog):
     def __init__(self, client):
@@ -55,7 +55,7 @@ class Kiss(commands.Cog):
         embed.set_author(name=msg, icon_url=ctx.author.avatar_url)
         embed.set_footer(text=f'Thanks for using {ctx.guild.me.name}', icon_url=ctx.guild.me.avatar_url)
         embed.set_image(url=gif)
-        await reply(self.client, ctx, embed=embed)
+        await ctx.reply(embed=embed)
 
 def setup(client):
     client.add_cog(Kiss(client))

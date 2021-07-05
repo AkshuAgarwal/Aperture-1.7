@@ -4,7 +4,7 @@ from typing import Union
 from discord import Member, User, Embed
 from discord.ext import commands
 
-from bot.main import NewCommand, reply
+from bot.main import NewCommand
 
 class Avatar(commands.Cog):
     def __init__(self, client):
@@ -43,7 +43,7 @@ The Member should be visible to Me. That means I need to share atleast 1 common 
         embed.set_footer(text=f'Thanks for using {ctx.guild.me.name}', icon_url=ctx.guild.me.avatar_url)
         embed.set_image(url=user.avatar_url)
         
-        await reply(self.client, ctx, embed=embed)
+        await ctx.reply(embed=embed)
 
 def setup(client):
     client.add_cog(Avatar(client))

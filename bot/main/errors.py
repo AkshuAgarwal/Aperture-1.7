@@ -4,7 +4,7 @@ from contextlib import suppress
 
 from discord.ext.commands import *
 
-async def error_handler(ctx: Context, error):
+async def error_handler(ctx, error):
     ignored = (CommandNotFound, )
     error = getattr(error, 'original', error)
 

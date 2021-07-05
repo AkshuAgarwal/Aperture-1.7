@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, reply
+from bot.main import NewCommand, Emoji
 
 class ChannelManagement(commands.Cog):
     def __init__(self, client):
@@ -51,7 +51,7 @@ All the Commands of the Bot cannot be used in that Channel but still be operatab
                         'channel_id': row['channel_id']
                     }
 
-        return await reply(self.client, ctx, resp)
+        return await ctx.reply(resp)
 
 
     @commands.command(
@@ -93,7 +93,7 @@ Only works if the Bot was already Disabled in that Channel.""",
                         'channel_id': row['channel_id']
                     }
 
-        return await reply(self.client, ctx, resp)
+        return await ctx.reply(resp)
 
 
 def setup(client):

@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands
 from tabulate import tabulate
 
-from bot.main import NewCommand, StringPaginator, Emoji, reply
+from bot.main import NewCommand, StringPaginator, Emoji
 
 class SQL(commands.Cog):
     def __init__(self, client):
@@ -55,7 +55,7 @@ This is a **Developer Only** Command. Means, only the Bot owner can use this Com
                     try:
                         data = await conn.fetch(query)
                         if not data:
-                            return await reply(self.client, ctx, f"Output: []")
+                            return await ctx.reply(f"Output: []")
                         for row in data:
                             temp_list.append(list(row.values()))
                         table = tabulate(temp_list, headers=list(data[0].keys()), showindex="always", tablefmt="psql")
@@ -65,16 +65,16 @@ This is a **Developer Only** Command. Means, only the Bot owner can use this Com
                         )
                         await pager.start(ctx)
                     except Exception as e:
-                        return await reply(self.client, ctx, f"{Emoji.redcross} **Oops! Some Error Occured...**\n> Error: `{e}`")
+                        return await ctx.reply(f"{Emoji.redcross} **Oops! Some Error Occured...**\n> Error: `{e}`")
                         # raise e
                 elif query_type == "execute":
                     try:
                         resp = await conn.execute(query)
-                        return await reply(self.client, ctx, f"> Output: `{resp}`")
+                        return await ctx.reply(f"> Output: `{resp}`")
                     except Exception as e:
-                        return await reply(self.client, ctx, f"{Emoji.redcross} **Oops! Some Error Occured...**\n> Error: `{e}`")
+                        return await ctx.reply(f"{Emoji.redcross} **Oops! Some Error Occured...**\n> Error: `{e}`")
                 else:
-                    return await reply(self.client, ctx, f"{Emoji.redcross} Invalid Query Type! Valid Types: `fetch`/`execute`")
+                    return await ctx.reply(f"{Emoji.redcross} Invalid Query Type! Valid Types: `fetch`/`execute`")
 
 
 def setup(client):

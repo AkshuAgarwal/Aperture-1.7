@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, reply
+from bot.main import NewCommand, Emoji
 
 class CommandManagement(commands.Cog):
     def __init__(self, client):
@@ -61,7 +61,7 @@ You can also use Command Alias instead of it's Name to Disable it.""",
                             'channel_id': row['channel_id']
                         }
 
-        return await reply(self.client, ctx, resp)
+        return await ctx.reply(resp)
 
 
     @commands.command(
@@ -111,7 +111,7 @@ You can also use Command Alias instead of it's Name to Enable it.""",
                             'channel_id': row['channel_id']
                         }
 
-        return await reply(self.client, ctx, resp)
+        return await ctx.reply(resp)
 
 
 def setup(client):

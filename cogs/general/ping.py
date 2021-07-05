@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from bot.main import NewCommand, reply
+from bot.main import NewCommand
 
 class Ping(commands.Cog):
     def __init__(self, client):
@@ -20,7 +20,7 @@ More Scientifically, Measures Latency between a HEARTBEAT and HEARTBEAT_ACK in s
     )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def _ping(self, ctx):
-        await reply(self.client, ctx, f":ping_pong: Pong! Latency: `{self.client.latency*1000:,.0f} ms`")
+        await ctx.reply(f":ping_pong: Pong! Latency: `{self.client.latency*1000:,.0f} ms`")
 
 
 def setup(client):

@@ -4,7 +4,7 @@ from datetime import datetime
 from discord import User, Member, Embed
 from discord.ext import commands
 
-from bot.main import NewCommand, reply, Emoji
+from bot.main import NewCommand, Emoji
 
 class Balance(commands.Cog):
     def __init__(self, client):
@@ -38,9 +38,9 @@ Use `createaccount` to Create an Account or use `currencyinfo` to know more!""",
 
             if not data:
                 if user == ctx.author:
-                    return await reply(self.client, ctx, f"{Emoji.redcross} You need to have an Apertures Currency Account first to check Balance or use commands that involves use of Bot Currency!\n\n> Use `{ctx.prefix}createaccount` to Create an Account and get Started.")
+                    return await ctx.reply(f"{Emoji.redcross} You need to have an Apertures Currency Account first to check Balance or use commands that involves use of Bot Currency!\n\n> Use `{ctx.prefix}createaccount` to Create an Account and get Started.")
                 else:
-                    return await reply(self.client, ctx, f"{Emoji.redcross} {user} has no Apertures Currency Account Registered!\n\n> **Tip:** They can create an account using `{ctx.prefix}createaccount`.")
+                    return await ctx.reply(f"{Emoji.redcross} {user} has no Apertures Currency Account Registered!\n\n> **Tip:** They can create an account using `{ctx.prefix}createaccount`.")
             else:
                 embed = Embed(
                     title=f"{user}'s Balance",
@@ -51,7 +51,7 @@ Use `createaccount` to Create an Account or use `currencyinfo` to know more!""",
                 embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
                 embed.set_footer(text=f'Thanks for using {ctx.guild.me.name}', icon_url=ctx.guild.me.avatar_url)
 
-                await reply(self.client, ctx, embed=embed)
+                await ctx.reply(embed=embed)
 
 
 def setup(client):

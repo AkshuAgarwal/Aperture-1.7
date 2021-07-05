@@ -5,7 +5,7 @@ from contextlib import suppress
 import discord
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, reply
+from bot.main import NewCommand, Emoji
 
 class TicTacToe(commands.Cog):
     def __init__(self, client):
@@ -177,16 +177,16 @@ Need more info on Apertures? Use `currencyinfo` Comand!""",
             async with conn.transaction() as trans:
                 data = await conn.fetchrow("SELECT balance FROM apertures_currency WHERE user_id=$1;", ctx.author.id)
                 if not data:
-                    return await reply(self.client, ctx, f"{Emoji.redcross} You need to have an Apertures Currency Account to play Games or use commands that involves use of Bot Currency!\n\n> Use `{ctx.prefix}createaccount` to Create an Account and get Started.")
+                    return await ctx.reply(f"{Emoji.redcross} You need to have an Apertures Currency Account to play Games or use commands that involves use of Bot Currency!\n\n> Use `{ctx.prefix}createaccount` to Create an Account and get Started.")
                 elif int(data['balance']) < 50:
-                    return await reply(self.client, ctx, "You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
+                    return await ctx.reply("You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
                 
                 players = [ctx.author]
                 redcross = self.client.get_emoji(int((Emoji.redcross)[-19:-1]))
                 greentick = self.client.get_emoji(int((Emoji.greentick)[-19:-1]))
                 emojis = ['🚪', redcross, greentick]
                 
-                response = await reply(self.client, ctx, f"**A Game of TicTacToe is going to be Started!**\nReact on this Message with {emojis[0]} to Enter or {emojis[1]} to Cancel.\n> Players Required: 2, Timeout: 3 Minutes, Apertures Required: 50/per Player\n\n> Participants: {ctx.author.mention}")
+                response = await ctx.reply(f"**A Game of TicTacToe is going to be Started!**\nReact on this Message with {emojis[0]} to Enter or {emojis[1]} to Cancel.\n> Players Required: 2, Timeout: 3 Minutes, Apertures Required: 50/per Player\n\n> Participants: {ctx.author.mention}")
 
                 await response.add_reaction(emojis[0])
                 await response.add_reaction(emojis[1])
@@ -210,7 +210,7 @@ Need more info on Apertures? Use `currencyinfo` Comand!""",
                         if reaction.emoji == emojis[0]:
                             data = await conn.fetchrow("SELECT balance FROM apertures_currency WHERE user_id=$1;", user.id)
                             if not data:
-                                return await reply(self.client, ctx, f"{Emoji.redcross} You need to have an Apertures Currency Account to play Games or use commands that involves use of Bot Currency!\n\n> Use `{ctx.prefix}createaccount` to Create an Account and get Started.")
+                                return await ctx.reply(f"{Emoji.redcross} You need to have an Apertures Currency Account to play Games or use commands that involves use of Bot Currency!\n\n> Use `{ctx.prefix}createaccount` to Create an Account and get Started.")
                             elif int(data['balance']) < 50:
                                 await ctx.send(f"{user.mention}, You do not have enough Apertures to play the Game!\n> Minimum Required: 50 Apertures", delete_after=10)
                             else:

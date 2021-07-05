@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, reply
+from bot.main import NewCommand, Emoji
 
 from art import text2art
 
@@ -26,14 +26,14 @@ Max Length of Text can be x Letters.""",
     @commands.cooldown(2, 10, type=commands.BucketType.member)
     async def _asciiart(self, ctx, *, text: str):
         if len(text) > 25:
-            return await reply(self.client, ctx, f"{Emoji.redcross} Length of Text cannot be more than 25 Characters!")
+            return await ctx.reply(f"{Emoji.redcross} Length of Text cannot be more than 25 Characters!")
 
         art = text2art(text)
 
         if len(art) > 1990:
-            return await reply(self.client, ctx, f"Oops! ASCII Art crossed more than 2000 Words. Please try a smaller Text.")
+            return await ctx.reply(f"Oops! ASCII Art crossed more than 2000 Words. Please try a smaller Text.")
 
-        await reply(self.client, ctx, f"```\n{art}```")
+        await ctx.reply(f"```\n{art}```")
 
 
 def setup(client):

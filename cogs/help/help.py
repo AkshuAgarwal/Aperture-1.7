@@ -4,7 +4,7 @@ import datetime
 from discord import utils, Embed
 from discord.ext import commands
 
-from bot.main import NewCommand, Emoji, Paginator, reply
+from bot.main import NewCommand, Emoji, Paginator
 
 class Help(commands.Cog):
     def __init__(self, client):
@@ -110,9 +110,9 @@ class Help(commands.Cog):
             embed.add_field(name=f"{Emoji.cmd_examples} | Examples",
                 value=_cmd_examples, inline=False)
 
-            return await reply(self.client, ctx, f"> Tip: Use `{ctx.prefix}help --all` to get a list of all commands in your DMs!", embed=embed)
+            return await ctx.reply(f"> Tip: Use `{ctx.prefix}help --all` to get a list of all commands in your DMs!", embed=embed)
         else:
-            return await reply(self.client, ctx, f"{Emoji.redcross} No Command named `{command_name}` Found!")
+            return await ctx.reply(f"{Emoji.redcross} No Command named `{command_name}` Found!")
 
 
     @commands.command(
@@ -139,7 +139,7 @@ class Help(commands.Cog):
         if not command_name:
             await self.build_help(ctx)
         elif command_name == '--all':
-            return await reply(self.client, ctx, "Command Making is in Progress...")
+            return await ctx.reply("Command Making is in Progress...")
         else:
             await self.get_command_help(ctx, command_name)
 
